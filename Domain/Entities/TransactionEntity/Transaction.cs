@@ -31,8 +31,9 @@ public class Transaction : BaseEntity
 
     public Transaction(int userId, string idempotencyKey, TransactionStatus status, string transactionReference = "")
     {
-        if (userId <= 0)
-            throw new ValidationsException("User ID must be a positive integer.");
+        // userId 0 = compra sin cuenta registrada (guest checkout)
+        if (userId < 0)
+            throw new ValidationsException("User ID must be a non-negative integer.");
         if (string.IsNullOrWhiteSpace(idempotencyKey))
             throw new ValidationsException("Idempotency key cannot be empty.");
 

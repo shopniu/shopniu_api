@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Shopniu_api.Infrastructure.Persistance;
+using Shopniu_api.Infrastructure.Persistance.Seeders;
 
 namespace Shopniu_api.Infrastructure.Configuration;
 
@@ -25,10 +26,7 @@ public static class DatabaseInitializationExtensions
 
         if (seedOnStartup)
         {
-            // await RolePermissionSeeder.SeedAsync(dbContext, roleManager);
-            // await UserSeeder.SeedAsync(scope.ServiceProvider);
-            // await OpenIddictScopeSeeder.SeedAsync(scope.ServiceProvider);
-            // await OpenIddictClientSeeder.SeedAsync(scope.ServiceProvider);
+            await ProductSeeder.SeedAsync(dbContext);
         }
 
         return app;

@@ -16,7 +16,7 @@ public class ProductController : ControllerBase
         _productHandler = productService;
     }
 
-    [Authorize(Policy = "product.create")]
+
     [HttpGet]
     public async Task<IActionResult> GetAllProducts()
     {

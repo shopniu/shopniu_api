@@ -11,7 +11,7 @@ public sealed record TransactionProductRequest(
 );
 
 public sealed record CreateTransactionRequest(
-    int UserId,
+    string? CustomerEmail,
     string IdempotencyKey,
     PaymentMethodType PaymentMethod,
     CurrencyType Currency,
@@ -23,6 +23,7 @@ public sealed record CreateTransactionRequest(
 
 public sealed record CreateTransactionResponse(
     int TransactionId,
+    string Reference,
     TransactionStatus Status
 
 );

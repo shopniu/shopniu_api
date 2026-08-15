@@ -1,4 +1,5 @@
 // Infrastructure/Services/CurrentUserService.cs
+using System.Security.Claims;
 using OpenIddict.Abstractions;
 using Shopniu_api.Aplication.Common.Ports.Identity;
 
@@ -13,16 +14,20 @@ public class CurrentUserService : ICurrentUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    private System.Security.Claims.ClaimsPrincipal User =>
-        _httpContextAccessor.HttpContext?.User
-        ?? throw new InvalidOperationException("No hay usuario autenticado en el contexto actual.");
+    private ClaimsPrincipal? User =>
+        _httpContextAccessor.HttpContext?.User;
 
-    public int UserId =>
-        int.Parse(User.FindFirst(OpenIddictConstants.Claims.Subject)!.Value);
+    /// <summary>0 si no hay usuario autenticado (guest checkout).</summary>
+    public int UserId
+    {
+        get
+        {
+            var subject = User?.FindFirst(OpenIddictConstants.Claims.Subject)?.Value;
+            return int.TryParse(subject, out var id) ? id : 0;
+        }
+    }
 
-    public string Email =>
-        User.FindFirst(OpenIddictConstants.Claims.Email)!.Value;
+    public string? Email => User?.FindFirst(OpenIddictConstants.Claims.Email)?.Value;
 
-    public string Name =>
-        User.FindFirst(OpenIddictConstants.Claims.Name)!.Value;
+    public string? Name => User?.FindFirst(OpenIddictConstants.Claims.Name)?.Value;
 }

@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: shopniu-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: shopniu_user
+      POSTGRES_PASSWORD: shopniu_password
+      POSTGRES_DB: shopniu_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - shopniu-network
+
+  shopniu-api:
+    container_name: shopniu-api-app
+    build:
+      context: ..
+      dockerfile: ./shopniu-api/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres-db;Port=5432;Database=shopniu_db;Username=shopniu_user;Password=shopniu_password
+    depends_on:
+      - postgres-db
+    networks:
+      - shopniu-network
+
+volumes:
+  postgres_data:
+
+networks:
+  shopniu-network:
+    driver: bridge

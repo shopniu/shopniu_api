@@ -31,6 +31,12 @@ public static class PaymentServicesExtensions
             var wompiSettings = serviceProvider.GetRequiredService<IOptions<WompiSettings>>().Value;
             client.BaseAddress = new Uri(wompiSettings.ApiUrl);
             client.Timeout = TimeSpan.FromSeconds(15);
+        })
+        // No reutilizar conexiones: reduce el reintento por "conexión stale" en
+        // la pasarela de pagos (reintentar un POST duplicaría la referencia).
+        .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.Zero
         });
 
         return services;

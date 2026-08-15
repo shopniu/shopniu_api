@@ -1,5 +1,8 @@
 
+using System.Net;
 using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Shopniu_api.Infrastructure.ExternalServices.Payment.Wompi.Services;
 using Shopniu_api.Aplication.Transactions.Ports;
@@ -38,7 +41,13 @@ public class WompiPaymentGateway : IPaymentGateway
 
         wompiRequest.Signature = _signatureGenerator.GenerateSignature(wompiRequest);
 
-        var response = await _httpClient.PostAsJsonAsync("transactions", wompiRequest);
+        // Contenido NO rewindable: si la conexión se cae, HttpClient NO debe
+        // reintentar automáticamente un pago (reintentar reutilizaría la misma
+        // referencia y Wompi respondería "La referencia ya ha sido usada").
+        var json = JsonSerializer.Serialize(wompiRequest);
+        using var content = new NonRewindableJsonContent(json);
+
+        var response = await _httpClient.PostAsync("transactions", content);
         if (!response.IsSuccessStatusCode)
         {
             var errorBody = await response.Content.ReadAsStringAsync();
@@ -61,5 +70,29 @@ public class WompiPaymentGateway : IPaymentGateway
         },
         _ => throw new BusinessRuleException($"Método de pago no soportado por Wompi: {paymentMethod}")
     };
+
+    /// <summary>HttpContent sin longitud conocida y sin buffer rewindable:
+    /// impide que HttpClient reintente automáticamente la petición.</summary>
+    private sealed class NonRewindableJsonContent : HttpContent
+    {
+        private readonly byte[] _payload;
+
+        public NonRewindableJsonContent(string json)
+        {
+            _payload = Encoding.UTF8.GetBytes(json);
+            Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        }
+
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context)
+        {
+            return stream.WriteAsync(_payload, 0, _payload.Length);
+        }
+
+        protected override bool TryComputeLength(out long length)
+        {
+            length = -1;
+            return false;
+        }
+    }
 
 }

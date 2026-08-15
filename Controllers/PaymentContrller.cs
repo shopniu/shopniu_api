@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Shopniu_api.Aplication.Payments;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v1/payments")]
 public class PaymentController : ControllerBase
 {
     private readonly PaymentsHandler _paymentsHandler;

@@ -1,6 +1,7 @@
 
 
 using Shopniu_api.Domain.Exceptions.Common;
+using Shopniu_api.Domain.Exceptions;
 using Shopniu_api.Domain.Repositories;
 using Shopniu_api.Domain.Entities.TransactionEntity;
 using Shopniu_api.Aplication.Transactions.Ports;
@@ -39,9 +40,23 @@ public class CreateTransactionUseCase
         {
             return new CreateTransactionResponse(
                 TransactionId: existingTransaction.Id,
+                Reference: existingTransaction.TransactionReference,
                 Status: existingTransaction.Status
             ); // Retornar la transacción existente si ya existe
         }
+
+        // El usuario se resuelve desde el contexto (token); 0 = compra sin cuenta.
+        var userId = _currentUser.UserId;
+        // Wompi exige el email del cliente: se toma del request (guest) o del
+        // contexto (usuario con sesión).
+        var customerEmail = string.IsNullOrWhiteSpace(dto.CustomerEmail)
+            ? _currentUser.Email
+            : dto.CustomerEmail.Trim();
+        if (string.IsNullOrWhiteSpace(customerEmail))
+        {
+            throw new BusinessRuleException("El email del cliente es requerido para el pago.");
+        }
+
         // consultar los productos
         var products = (await _productRepository.GetByIdsAsync(dto.Products.Select(p => p.ProductId).ToList())).ToDictionary(p => p.Id);
 
@@ -58,16 +73,19 @@ public class CreateTransactionUseCase
         }
 
 
+        // Referencia determinística por intención (deriva del idempotencyKey):
+        // un reintento con la misma clave corta en el check de arriba y nunca
+        // reenvía la misma referencia a Wompi.
         var transaction = new Transaction(
-            userId: dto.UserId,
+            userId: userId,
             idempotencyKey: dto.IdempotencyKey,
-            transactionReference: $"shopniu_{Guid.NewGuid():N}",
+            transactionReference: $"shopniu_{dto.IdempotencyKey}",
             status: TransactionStatus.PENDING
         );
 
         // Create orders by product
         var orders = dto.Products
-        .Select(item => new Order(dto.UserId, item.ProductId, item.Quantity, transaction)).ToList();
+        .Select(item => new Order(userId, item.ProductId, item.Quantity, transaction)).ToList();
 
         // get payment details
         var paymentDetails = PaymentDetails.Create(
@@ -85,12 +103,13 @@ public class CreateTransactionUseCase
             AmountInCents: paymentDetails.TotalInCents,
             Currency: dto.Currency,
             Reference: transaction.TransactionReference,
-            Email: _currentUser.Email,
+            Email: customerEmail,
             PaymentMethod: dto.PaymentMethod,
             ProviderToken: dto.ProviderToken,
             AcceptanceToken: dto.AcceptanceToken,
             AcceptancePersonalToken: dto.AcceptancePersonalToken
         );
+
         var paymentResponse = await _paymentGateway.CreatePayment(paymentRequest);
 
         // Update transaction with necesary data payment response
@@ -101,6 +120,7 @@ public class CreateTransactionUseCase
 
         return new CreateTransactionResponse(
             TransactionId: transaction.Id,
+            Reference: transaction.TransactionReference,
             Status: transaction.Status
         );
     }

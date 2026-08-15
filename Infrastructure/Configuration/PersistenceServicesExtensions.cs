@@ -14,7 +14,7 @@ public static class PersistenceServicesExtensions
         }
 
         services.AddDbContextPool<AppDbContext>(options =>
-            options.UseSqlServer(defaultConnection));
+            options.UseNpgsql(defaultConnection));
 
         return services;
     }

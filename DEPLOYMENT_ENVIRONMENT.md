@@ -22,7 +22,7 @@ Run these commands in the project root:
 
 ```powershell
 dotnet user-secrets init
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost;Database=shopniudb;Trusted_Connection=True;TrustServerCertificate=True;"
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=shopniu_api_db;Username=postgres;Password=postgres"
 dotnet user-secrets set "Wompi:IntegrityKey" "your_integrity_key"
 dotnet user-secrets set "Wompi:PublicKey" "your_public_key"
 dotnet user-secrets set "Wompi:PrivateKey" "your_private_key"
