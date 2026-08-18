@@ -11,7 +11,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -83,6 +83,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha
+            type=raw,value=${{ github.sha }}
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push
@@ -98,3 +99,65 @@ jobs:
             GITHUB_ACTOR=${{ github.actor }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to Azure Container Apps
+    needs: docker-publish
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    permissions:
+      contents: read
+
+    steps:
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Wait for container app provisioning
+        env:
+          AZURE_CONTAINERAPP: shopniu-api
+          AZURE_RESOURCE_GROUP: shopniu
+        run: |
+          for i in $(seq 1 60); do
+            state=$(az containerapp show --name "$AZURE_CONTAINERAPP" --resource-group "$AZURE_RESOURCE_GROUP" --query properties.provisioningState -o tsv 2>/dev/null || echo Unknown)
+            echo "provisioningState=$state"
+            [ "$state" = "Succeeded" ] && exit 0
+            sleep 10
+          done
+          echo "Timeout waiting for container app provisioning" >&2
+          exit 1
+
+      - name: Deploy to Azure Container Apps
+        timeout-minutes: 15
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          imageToDeploy: ghcr.io/${{ github.repository }}:${{ github.sha }}
+          containerAppName: shopniu-api
+          resourceGroup: shopniu
+          containerAppEnvironment: thankfulmushroom-4e17c339
+          registry-url: ghcr.io
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.NUGET_PACKAGES_TOKEN }}
+          targetPort: 8080
+
+      - name: Wait for revision ready
+        env:
+          AZURE_CONTAINERAPP: shopniu-api
+          AZURE_RESOURCE_GROUP: shopniu
+        run: |
+          for i in $(seq 1 60); do
+            latest=$(az containerapp show --name "$AZURE_CONTAINERAPP" --resource-group "$AZURE_RESOURCE_GROUP" --query properties.latestRevisionName -o tsv 2>/dev/null || echo "")
+            ready=$(az containerapp show --name "$AZURE_CONTAINERAPP" --resource-group "$AZURE_RESOURCE_GROUP" --query properties.latestReadyRevisionName -o tsv 2>/dev/null || echo "")
+            echo "latestRevision=$latest readyRevision=$ready"
+            [ -n "$latest" ] && [ "$latest" = "$ready" ] && exit 0
+            sleep 5
+          done
+          echo "Timeout waiting for revision to become ready" >&2
+          exit 1
+
+      - name: Azure logout
+        if: always()
+        run: az logout
