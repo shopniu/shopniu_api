@@ -106,3 +106,26 @@ Workflow `.github/workflows/ci.yml` (push a `main` y PRs):
 - **401 / NU1301 en restore:** variable `GITHUB_PACKAGES_TOKEN` no definida o PAT expirado.
 - **401 en endpoints:** el token no es válido o el issuer (`Identity__Issuer`) no coincide con identity.
 - **`dotnet format --verify-no-changes` falla en CI:** correr `dotnet format` local y commitear.
+
+## Convención de commits
+
+Misma convención para todo el workspace (ver `AGENTS.md` en la raíz del proyecto):
+
+```
+tipo(scope): descripción en español
+```
+
+- **tipo** (obligatorio): `feat`, `fix`, `test`, `refactor`, `chore`, `docs`
+- **scope** (opcional): área afectada, ej. `transactions`, `webhook`, `db`, `ci/cd`
+- **descripción**: en español, minúsculas, concisa, en pasado o imperativo (ej. `se corrigió`)
+
+Ejemplos:
+
+```
+feat(transactions): persistir user payment data y delivery al crear transacción
+fix(cart): se corrigió el cálculo del subtotal
+chore(db): migración AddDeliveryAndPaymentDataFlow
+docs: documentar convención de commits
+```
+
+Antes de commitear: `dotnet build -c Release` sin errores y `dotnet format --verify-no-changes` en 0.
