@@ -10,6 +10,15 @@ public sealed record TransactionProductRequest(
     int Quantity
 );
 
+public sealed record DeliveryRequest(
+    string Address,
+    string City,
+    string State,
+    string DepartmentCode,
+    string CityCode,
+    string? Phone
+);
+
 public sealed record CreateTransactionRequest(
     string? CustomerEmail,
     string IdempotencyKey,
@@ -18,6 +27,9 @@ public sealed record CreateTransactionRequest(
     string ProviderToken,
     string AcceptanceToken,
     string AcceptancePersonalToken,
+    string? CardHolderName,
+    int CardLastFour,
+    DeliveryRequest Delivery,
     List<TransactionProductRequest> Products
 );
 

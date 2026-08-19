@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shopniu_api.Domain.Entities.UserPaymentDataEntity;
@@ -10,7 +9,7 @@ public class UserPaymentDataConfiguration : IEntityTypeConfiguration<UserPayment
     public void Configure(EntityTypeBuilder<UserPaymentData> builder)
     {
         builder.ToTable("UserPaymentData");
-        builder.HasKey(upd => new { upd.UserId, upd.LastFour });
+        builder.HasKey(upd => upd.Id);
 
         builder.Property(upd => upd.CardHolderName)
             .IsRequired()
@@ -24,5 +23,7 @@ public class UserPaymentDataConfiguration : IEntityTypeConfiguration<UserPayment
             .IsRequired();
         builder.Property(upd => upd.PaymentMethod)
             .IsRequired();
+        builder.HasIndex(upd => new { upd.UserId, upd.LastFour, upd.Address })
+            .IsUnique();
     }
 }

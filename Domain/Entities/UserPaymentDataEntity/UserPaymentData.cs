@@ -21,7 +21,7 @@ public class UserPaymentData : BaseEntity
     public PaymentMethodType PaymentMethod { get; set; }
 
 
-    public UserPaymentData(string cardNumber, string cardHolderName, string address, string phoneNumber, int lastFour, int userId, PaymentMethodType paymentMethod)
+    public UserPaymentData(string? cardNumber, string cardHolderName, string address, string phoneNumber, int lastFour, int userId, PaymentMethodType paymentMethod)
     {
         if (string.IsNullOrWhiteSpace(cardHolderName))
             throw new ValidationsException("Card holder name cannot be empty.");
@@ -29,8 +29,8 @@ public class UserPaymentData : BaseEntity
             throw new ValidationsException("Address cannot be empty.");
         if (lastFour < 0 || lastFour > 9999)
             throw new ValidationsException("Last four digits must be a positive integer between 0 and 9999.");
-        if (userId <= 0)
-            throw new ValidationsException("User ID must be a positive integer.");
+        if (userId < 0)
+            throw new ValidationsException("User ID must be a non-negative integer.");
 
         CardNumber = cardNumber;
         CardHolderName = cardHolderName;
@@ -40,4 +40,9 @@ public class UserPaymentData : BaseEntity
         UserId = userId;
         PaymentMethod = paymentMethod;
     }
+
+    /// <summary>Determina si este registro ya corresponde al mismo usuario,
+    /// misma tarjeta (últimos 4 dígitos) y misma dirección de entrega.</summary>
+    public bool Matches(int userId, string address, int lastFour) =>
+        UserId == userId && Address == address && LastFour == lastFour;
 }

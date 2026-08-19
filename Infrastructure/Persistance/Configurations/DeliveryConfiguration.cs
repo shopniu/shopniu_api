@@ -1,9 +1,6 @@
-
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shopniu_api.Domain.Entities.DeliveryEntity;
-
 
 namespace Shopniu_api.Infrastructure.Persistance.Configurations;
 
@@ -22,14 +19,13 @@ public class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         builder.Property(d => d.State)
             .IsRequired()
             .HasMaxLength(100);
-        builder.Property(d => d.ZipCode)
+        builder.Property(d => d.DepartmentCode)
             .IsRequired()
-            .HasMaxLength(20);
-        builder.Property(d => d.Country)
+            .HasMaxLength(10);
+        builder.Property(d => d.CityCode)
             .IsRequired()
-            .HasMaxLength(100);
-        builder.Property(d => d.status)
+            .HasMaxLength(10);
+        builder.Property(d => d.Status)
             .IsRequired();
-
     }
 }

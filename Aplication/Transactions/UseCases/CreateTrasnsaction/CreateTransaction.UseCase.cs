@@ -1,5 +1,3 @@
-
-
 using Shopniu_api.Domain.Exceptions.Common;
 using Shopniu_api.Domain.Exceptions;
 using Shopniu_api.Domain.Repositories;
@@ -7,6 +5,8 @@ using Shopniu_api.Domain.Entities.TransactionEntity;
 using Shopniu_api.Aplication.Transactions.Ports;
 using Shopniu_api.Domain.Entities.OrderEntity;
 using Shopniu_api.Domain.Entities.PaymentDetailsEntity;
+using Shopniu_api.Domain.Entities.DeliveryEntity;
+using Shopniu_api.Domain.Entities.UserPaymentDataEntity;
 using Shopniu_api.Aplication.Common.Ports.Identity;
 
 namespace Shopniu_api.Aplication.Transactions.UseCases.CreateTransaction;
@@ -17,18 +17,24 @@ public class CreateTransactionUseCase
     private readonly ICurrentUserService _currentUser;
     private readonly IProductRepository _productRepository;
     private readonly IPaymentGateway _paymentGateway;
+    private readonly IUserPaymentDataRepository _userPaymentDataRepository;
+    private readonly IDeliveryRepository _deliveryRepository;
     private readonly IUnitOfWork _unitOfWork;
     public CreateTransactionUseCase(
         ITransactionRepository transactionRepository,
         ICurrentUserService currentUserService,
         IProductRepository productRepository,
         IPaymentGateway paymentGateway,
+        IUserPaymentDataRepository userPaymentDataRepository,
+        IDeliveryRepository deliveryRepository,
         IUnitOfWork unitOfWork)
     {
         _transactionRepository = transactionRepository;
         _productRepository = productRepository;
         _currentUser = currentUserService;
         _paymentGateway = paymentGateway;
+        _userPaymentDataRepository = userPaymentDataRepository;
+        _deliveryRepository = deliveryRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -72,7 +78,6 @@ public class CreateTransactionUseCase
             productsWithQuantity.Add(new ProductWithQuantity(productDto.Quantity, product));
         }
 
-
         // Referencia determinística por intención (deriva del idempotencyKey):
         // un reintento con la misma clave corta en el check de arriba y nunca
         // reenvía la misma referencia a Wompi.
@@ -97,6 +102,38 @@ public class CreateTransactionUseCase
         );
 
         await _transactionRepository.CreateAsync(transaction);
+
+        // Crear/verificar los datos de pago del cliente: se crean siempre (con
+        // userId 0 si la compra es sin cuenta) pero sin duplicar el registro
+        // cuando ya existe el mismo usuario + tarjeta + dirección.
+        var existingPaymentData = await _userPaymentDataRepository
+            .GetByUserIdAndLastFourAsync(userId, dto.CardLastFour);
+        if (!existingPaymentData.Any(pd => pd.Matches(userId, dto.Delivery.Address, dto.CardLastFour)))
+        {
+            var userPaymentData = new UserPaymentData(
+                cardNumber: null,
+                cardHolderName: dto.CardHolderName ?? "",
+                address: dto.Delivery.Address,
+                phoneNumber: dto.Delivery.Phone ?? "",
+                lastFour: dto.CardLastFour,
+                userId: userId,
+                paymentMethod: dto.PaymentMethod
+            );
+            await _userPaymentDataRepository.CreateAsync(userPaymentData);
+        }
+
+        // El delivery nace PENDING, igual que la transacción; el webhook lo
+        // actualiza según el resultado del pago.
+        var delivery = new Delivery(
+            address: dto.Delivery.Address,
+            city: dto.Delivery.City,
+            state: dto.Delivery.State,
+            departmentCode: dto.Delivery.DepartmentCode,
+            cityCode: dto.Delivery.CityCode,
+            userId: userId,
+            transaction: transaction
+        );
+        await _deliveryRepository.CreateAsync(delivery);
 
         // Create payment request by payment gateway
         var paymentRequest = new PaymentRequest(

@@ -15,6 +15,8 @@ public static class RepositoryServicesExtensions
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IPaymentDetailsRepository, PaymentDetailsRepository>();
+        services.AddScoped<IDeliveryRepository, DeliveryRepository>();
+        services.AddScoped<IUserPaymentDataRepository, UserPaymentDataRepository>();
 
         return services;
     }
