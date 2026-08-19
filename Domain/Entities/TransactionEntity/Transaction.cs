@@ -24,6 +24,7 @@ public class Transaction : BaseEntity
     public string IdempotencyKey { get; set; } = null!;
     public TransactionStatus Status { get; set; } = TransactionStatus.PENDING;
     public string TransactionReference { get; set; } = null!;
+    public string? ProviderTransactionId { get; set; }
     public PaymentDetails PaymentDetails { get; set; } = null!;
     public List<Order> Orders { get; set; } = new List<Order>();
 
@@ -43,9 +44,9 @@ public class Transaction : BaseEntity
         Status = status;
     }
 
-    public void UpdatePaymentResult(string providerReference, TransactionStatus status)
+    public void UpdatePaymentResult(string providerTransactionId, TransactionStatus status)
     {
-        TransactionReference = providerReference;
+        ProviderTransactionId = providerTransactionId;
         Status = status;
     }
 }

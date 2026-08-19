@@ -24,7 +24,7 @@ public class ProcessPaymentWebhookUseCase
             throw new NotFoundException("Transaction", payload.ProviderReference);
         }
 
-        transaction.UpdatePaymentResult(payload.ProviderReference, payload.Status);
+        transaction.UpdatePaymentResult(payload.ProviderTransactionId, payload.Status);
         await _unitOfWork.SaveChangesAsync();
     }
 }
