@@ -30,7 +30,8 @@ public sealed record CreateTransactionRequest(
     string? CardHolderName,
     int CardLastFour,
     DeliveryRequest Delivery,
-    List<TransactionProductRequest> Products
+    List<TransactionProductRequest> Products,
+    bool SavePayment
 );
 
 public sealed record CreateTransactionResponse(

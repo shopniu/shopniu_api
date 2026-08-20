@@ -103,27 +103,30 @@ public class CreateTransactionUseCase
 
         await _transactionRepository.CreateAsync(transaction);
 
-        // Crear/verificar los datos de pago del cliente: se crean siempre (con
-        // userId 0 si la compra es sin cuenta) pero sin duplicar el registro
-        // cuando ya existe el mismo usuario + tarjeta + dirección.
-        var existingPaymentData = await _userPaymentDataRepository
-            .GetByUserIdAndLastFourAsync(userId, dto.CardLastFour);
-        if (!existingPaymentData.Any(pd => pd.Matches(userId, dto.Delivery.Address, dto.CardLastFour)))
+        // Guardar los datos de pago del cliente solo si lo solicitó y tiene
+        // cuenta (userId 0 = guest: nunca se guarda). Se evita duplicar el
+        // registro cuando ya existe el mismo usuario + tarjeta + dirección.
+        if (dto.SavePayment && userId != 0)
         {
-            var userPaymentData = new UserPaymentData(
-                cardNumber: null,
-                cardHolderName: dto.CardHolderName ?? "",
-                address: dto.Delivery.Address,
-                phoneNumber: dto.Delivery.Phone ?? "",
-                city: dto.Delivery.City,
-                department: dto.Delivery.Department,
-                departmentCode: dto.Delivery.DepartmentCode,
-                cityCode: dto.Delivery.CityCode,
-                lastFour: dto.CardLastFour,
-                userId: userId,
-                paymentMethod: dto.PaymentMethod
-            );
-            await _userPaymentDataRepository.CreateAsync(userPaymentData);
+            var existingPaymentData = await _userPaymentDataRepository
+                .GetByUserIdAndLastFourAsync(userId, dto.CardLastFour);
+            if (!existingPaymentData.Any(pd => pd.Matches(userId, dto.Delivery.Address, dto.CardLastFour)))
+            {
+                var userPaymentData = new UserPaymentData(
+                    cardNumber: null,
+                    cardHolderName: dto.CardHolderName ?? "",
+                    address: dto.Delivery.Address,
+                    phoneNumber: dto.Delivery.Phone ?? "",
+                    city: dto.Delivery.City,
+                    department: dto.Delivery.Department,
+                    departmentCode: dto.Delivery.DepartmentCode,
+                    cityCode: dto.Delivery.CityCode,
+                    lastFour: dto.CardLastFour,
+                    userId: userId,
+                    paymentMethod: dto.PaymentMethod
+                );
+                await _userPaymentDataRepository.CreateAsync(userPaymentData);
+            }
         }
 
         // El delivery nace PENDING, igual que la transacción; el webhook lo
