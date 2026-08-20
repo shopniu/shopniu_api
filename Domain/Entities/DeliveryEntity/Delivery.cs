@@ -21,7 +21,7 @@ public class Delivery : BaseEntity
     public int UserId { get; set; }
     public string Address { get; set; } = null!;
     public string City { get; set; } = null!;
-    public string State { get; set; } = null!;
+    public string Department { get; set; } = null!;
     public string DepartmentCode { get; set; } = null!;
     public string CityCode { get; set; } = null!;
     public DeliveryStatus Status { get; set; }
@@ -29,18 +29,18 @@ public class Delivery : BaseEntity
 
     private Delivery() { }
 
-    public Delivery(string address, string city, string state, string departmentCode, string cityCode, int userId, Transaction transaction)
+    public Delivery(string address, string city, string department, string departmentCode, string cityCode, int userId, Transaction transaction)
     {
         if (string.IsNullOrWhiteSpace(address))
             throw new ValidationsException("Address cannot be empty.");
         if (string.IsNullOrWhiteSpace(city))
             throw new ValidationsException("City cannot be empty.");
-        if (string.IsNullOrWhiteSpace(state))
-            throw new ValidationsException("State cannot be empty.");
+        if (string.IsNullOrWhiteSpace(department))
+            throw new ValidationsException("Department cannot be empty.");
 
         Address = address;
         City = city;
-        State = state;
+        Department = department;
         DepartmentCode = departmentCode;
         CityCode = cityCode;
         UserId = userId;

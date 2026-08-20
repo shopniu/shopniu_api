@@ -16,7 +16,7 @@ public class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
         builder.Property(d => d.City)
             .IsRequired()
             .HasMaxLength(100);
-        builder.Property(d => d.State)
+        builder.Property(d => d.Department)
             .IsRequired()
             .HasMaxLength(100);
         builder.Property(d => d.DepartmentCode)

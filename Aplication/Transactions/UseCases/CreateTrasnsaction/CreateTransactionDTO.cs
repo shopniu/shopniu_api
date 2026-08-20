@@ -13,7 +13,7 @@ public sealed record TransactionProductRequest(
 public sealed record DeliveryRequest(
     string Address,
     string City,
-    string State,
+    string Department,
     string DepartmentCode,
     string CityCode,
     string? Phone

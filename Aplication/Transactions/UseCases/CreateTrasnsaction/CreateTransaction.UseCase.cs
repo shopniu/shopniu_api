@@ -127,7 +127,7 @@ public class CreateTransactionUseCase
         var delivery = new Delivery(
             address: dto.Delivery.Address,
             city: dto.Delivery.City,
-            state: dto.Delivery.State,
+            department: dto.Delivery.Department,
             departmentCode: dto.Delivery.DepartmentCode,
             cityCode: dto.Delivery.CityCode,
             userId: userId,
