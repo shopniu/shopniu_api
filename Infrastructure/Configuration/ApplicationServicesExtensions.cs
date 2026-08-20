@@ -1,4 +1,5 @@
 
+using FluentValidation;
 using Shopniu_api.Aplication.Payments;
 using Shopniu_api.Aplication.Payments.UseCases.GetPaymentMethods;
 using Shopniu_api.Aplication.Payments.UseCases.ProcessPaymentWebhook;
@@ -25,6 +26,8 @@ public static class ApplicationServicesExtensions
         services.AddScoped<PaymentsHandler>();
         services.AddScoped<ProcessPaymentWebhookUseCase>();
         services.AddScoped<GetPaymentMethodsUseCase>();
+
+        services.AddValidatorsFromAssembly(typeof(ApplicationServicesExtensions).Assembly);
 
         return services;
     }

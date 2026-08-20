@@ -53,15 +53,9 @@ public class CreateTransactionUseCase
 
         // El usuario se resuelve desde el contexto (token); 0 = compra sin cuenta.
         var userId = _currentUser.UserId;
-        // Wompi exige el email del cliente: se toma del request (guest) o del
-        // contexto (usuario con sesión).
-        var customerEmail = string.IsNullOrWhiteSpace(dto.CustomerEmail)
-            ? _currentUser.Email
-            : dto.CustomerEmail.Trim();
-        if (string.IsNullOrWhiteSpace(customerEmail))
-        {
-            throw new BusinessRuleException("El email del cliente es requerido para el pago.");
-        }
+        // El email del cliente llega validado desde el front (zod/BFF) y se
+        // resuelve en el controller; acá solo se usa para el pago con Wompi.
+        var customerEmail = dto.CustomerEmail?.Trim();
 
         // consultar los productos
         var products = (await _productRepository.GetByIdsAsync(dto.Products.Select(p => p.ProductId).ToList())).ToDictionary(p => p.Id);
