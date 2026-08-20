@@ -1,5 +1,6 @@
 
 using Shopniu_api.Aplication.Payments;
+using Shopniu_api.Aplication.Payments.UseCases.GetPaymentMethods;
 using Shopniu_api.Aplication.Payments.UseCases.ProcessPaymentWebhook;
 using Shopniu_api.Aplication.Products;
 using Shopniu_api.Aplication.Products.UseCases.GetAllProducts;
@@ -23,6 +24,7 @@ public static class ApplicationServicesExtensions
 
         services.AddScoped<PaymentsHandler>();
         services.AddScoped<ProcessPaymentWebhookUseCase>();
+        services.AddScoped<GetPaymentMethodsUseCase>();
 
         return services;
     }

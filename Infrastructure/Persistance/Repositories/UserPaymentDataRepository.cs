@@ -27,4 +27,12 @@ public class UserPaymentDataRepository : IUserPaymentDataRepository
             .Where(upd => upd.UserId == userId && upd.LastFour == lastFour)
             .ToListAsync();
     }
+
+    public async Task<List<UserPaymentData>> GetByUserIdAsync(int userId)
+    {
+        return await _context.UserPaymentData
+            .Where(upd => upd.UserId == userId)
+            .OrderByDescending(upd => upd.Id)
+            .ToListAsync();
+    }
 }

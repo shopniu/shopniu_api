@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shopniu_api.Aplication.Payments;
 
@@ -20,5 +21,13 @@ public class PaymentController : ControllerBase
 
         await _paymentsHandler.ProcessWompiWebhookAsync(rawPayload);
         return Ok();
+    }
+
+    /// <summary>Métodos de pago guardados del usuario autenticado (token).</summary>
+    [Authorize]
+    [HttpGet("methods")]
+    public async Task<IActionResult> GetPaymentMethods()
+    {
+        return Ok(await _paymentsHandler.GetPaymentMethodsAsync());
     }
 }
