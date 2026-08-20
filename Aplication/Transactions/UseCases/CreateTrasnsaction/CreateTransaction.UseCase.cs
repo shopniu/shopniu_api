@@ -8,6 +8,7 @@ using Shopniu_api.Domain.Entities.PaymentDetailsEntity;
 using Shopniu_api.Domain.Entities.DeliveryEntity;
 using Shopniu_api.Domain.Entities.UserPaymentDataEntity;
 using Shopniu_api.Aplication.Common.Ports.Identity;
+using Shopniu_api.Aplication.Common.Ports.CardEncryption;
 
 namespace Shopniu_api.Aplication.Transactions.UseCases.CreateTransaction;
 
@@ -20,6 +21,7 @@ public class CreateTransactionUseCase
     private readonly IUserPaymentDataRepository _userPaymentDataRepository;
     private readonly IDeliveryRepository _deliveryRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICardEncryptionService _cardEncryption;
     public CreateTransactionUseCase(
         ITransactionRepository transactionRepository,
         ICurrentUserService currentUserService,
@@ -27,7 +29,8 @@ public class CreateTransactionUseCase
         IPaymentGateway paymentGateway,
         IUserPaymentDataRepository userPaymentDataRepository,
         IDeliveryRepository deliveryRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ICardEncryptionService cardEncryption)
     {
         _transactionRepository = transactionRepository;
         _productRepository = productRepository;
@@ -36,6 +39,7 @@ public class CreateTransactionUseCase
         _userPaymentDataRepository = userPaymentDataRepository;
         _deliveryRepository = deliveryRepository;
         _unitOfWork = unitOfWork;
+        _cardEncryption = cardEncryption;
     }
 
     public async Task<CreateTransactionResponse> ExecuteAsync(CreateTransactionRequest dto)
@@ -107,18 +111,20 @@ public class CreateTransactionUseCase
             if (!existingPaymentData.Any(pd => pd.Matches(userId, dto.Delivery.Address, dto.CardLastFour)))
             {
                 var userPaymentData = new UserPaymentData(
-                    cardNumber: null,
-                    cardHolderName: dto.CardHolderName ?? "",
-                    address: dto.Delivery.Address,
-                    phoneNumber: dto.Delivery.Phone ?? "",
-                    city: dto.Delivery.City,
-                    department: dto.Delivery.Department,
-                    departmentCode: dto.Delivery.DepartmentCode,
-                    cityCode: dto.Delivery.CityCode,
-                    lastFour: dto.CardLastFour,
-                    userId: userId,
-                    paymentMethod: dto.PaymentMethod
-                );
+                                cardNumber: _cardEncryption.Encrypt(dto.CardNumber),
+                                cardHolderName: dto.CardHolderName ?? "",
+                                address: dto.Delivery.Address,
+                                phoneNumber: dto.Delivery.Phone ?? "",
+                                city: dto.Delivery.City,
+                                department: dto.Delivery.Department,
+                                departmentCode: dto.Delivery.DepartmentCode,
+                                cityCode: dto.Delivery.CityCode,
+                                lastFour: dto.CardLastFour,
+                                userId: userId,
+                                paymentMethod: dto.PaymentMethod,
+                                expMonth: dto.ExpMonth,
+                                expYear: dto.ExpYear
+                            );
                 await _userPaymentDataRepository.CreateAsync(userPaymentData);
             }
         }

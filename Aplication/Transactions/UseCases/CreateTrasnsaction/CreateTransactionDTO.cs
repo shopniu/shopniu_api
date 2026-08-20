@@ -31,7 +31,12 @@ public sealed record CreateTransactionRequest(
     int CardLastFour,
     DeliveryRequest Delivery,
     List<TransactionProductRequest> Products,
-    bool SavePayment
+    bool SavePayment,
+    // Datos de la tarjeta requeridos solo cuando SavePayment es true (el
+    // PAN se persiste cifrado; nunca llega en claro en otras peticiones).
+    string? CardNumber = null,
+    string? ExpMonth = null,
+    string? ExpYear = null
 );
 
 public sealed record CreateTransactionResponse(

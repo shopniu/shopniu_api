@@ -23,9 +23,11 @@ public class UserPaymentData : BaseEntity
     public int LastFour { get; set; }
     public int UserId { get; set; }
     public PaymentMethodType PaymentMethod { get; set; }
+    public string? ExpMonth { get; set; }
+    public string? ExpYear { get; set; }
 
 
-    public UserPaymentData(string? cardNumber, string cardHolderName, string address, string phoneNumber, int lastFour, int userId, PaymentMethodType paymentMethod, string? city = null, string? department = null, string? departmentCode = null, string? cityCode = null)
+    public UserPaymentData(string? cardNumber, string cardHolderName, string address, string phoneNumber, int lastFour, int userId, PaymentMethodType paymentMethod, string? city = null, string? department = null, string? departmentCode = null, string? cityCode = null, string? expMonth = null, string? expYear = null)
     {
         if (string.IsNullOrWhiteSpace(cardHolderName))
             throw new ValidationsException("Card holder name cannot be empty.");
@@ -47,6 +49,8 @@ public class UserPaymentData : BaseEntity
         LastFour = lastFour;
         UserId = userId;
         PaymentMethod = paymentMethod;
+        ExpMonth = expMonth;
+        ExpYear = expYear;
     }
 
     /// <summary>Determina si este registro ya corresponde al mismo usuario,

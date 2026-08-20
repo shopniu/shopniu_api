@@ -59,5 +59,22 @@ public class CreateTransactionValidator : AbstractValidator<CreateTransactionReq
             product.RuleFor(p => p.Quantity)
                 .GreaterThan(0).WithMessage("Quantity must be greater than zero.");
         });
+
+        // El PAN y vencimiento solo se requieren cuando el usuario pidió
+        // guardar el método de pago (para persistirlo cifrado).
+        When(x => x.SavePayment, () =>
+        {
+            RuleFor(x => x.CardNumber)
+                .NotEmpty().WithMessage("Card number is required to save the payment method.")
+                .Matches(@"^[\d\s-]{15,19}$").WithMessage("Card number is invalid.");
+
+            RuleFor(x => x.ExpMonth)
+                .NotEmpty().WithMessage("Card expiry month is required to save the payment method.")
+                .Matches(@"^(0[1-9]|1[0-2])$").WithMessage("Card expiry month is invalid.");
+
+            RuleFor(x => x.ExpYear)
+                .NotEmpty().WithMessage("Card expiry year is required to save the payment method.")
+                .Matches(@"^\d{2,4}$").WithMessage("Card expiry year is invalid.");
+        });
     }
 }

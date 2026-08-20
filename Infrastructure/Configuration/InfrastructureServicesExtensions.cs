@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
+using Shopniu_api.Aplication.Common.Ports.CardEncryption;
+using Shopniu_api.Infrastructure.Services.CardEncryption;
 using System.IO.Compression;
 using System.Threading.RateLimiting;
 
@@ -9,6 +11,8 @@ public static class InfrastructureServicesExtensions
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddSingleton<ICardEncryptionService, AesGcmCardEncryptionService>();
+
         var rateLimitPermitLimit = configuration.GetValue<int?>("Scalability:RateLimiting:PermitLimit") ?? 120;
         var rateLimitWindowSeconds = configuration.GetValue<int?>("Scalability:RateLimiting:WindowSeconds") ?? 60;
 
