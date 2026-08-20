@@ -115,6 +115,10 @@ public class CreateTransactionUseCase
                 cardHolderName: dto.CardHolderName ?? "",
                 address: dto.Delivery.Address,
                 phoneNumber: dto.Delivery.Phone ?? "",
+                city: dto.Delivery.City,
+                department: dto.Delivery.Department,
+                departmentCode: dto.Delivery.DepartmentCode,
+                cityCode: dto.Delivery.CityCode,
                 lastFour: dto.CardLastFour,
                 userId: userId,
                 paymentMethod: dto.PaymentMethod

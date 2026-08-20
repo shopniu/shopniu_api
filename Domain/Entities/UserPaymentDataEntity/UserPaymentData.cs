@@ -15,13 +15,17 @@ public class UserPaymentData : BaseEntity
     public string Address { get; set; }
     [Phone]
     public string? PhoneNumber { get; set; }
+    public string? City { get; set; }
+    public string? Department { get; set; }
+    public string? DepartmentCode { get; set; }
+    public string? CityCode { get; set; }
     [Required]
     public int LastFour { get; set; }
     public int UserId { get; set; }
     public PaymentMethodType PaymentMethod { get; set; }
 
 
-    public UserPaymentData(string? cardNumber, string cardHolderName, string address, string phoneNumber, int lastFour, int userId, PaymentMethodType paymentMethod)
+    public UserPaymentData(string? cardNumber, string cardHolderName, string address, string phoneNumber, int lastFour, int userId, PaymentMethodType paymentMethod, string? city = null, string? department = null, string? departmentCode = null, string? cityCode = null)
     {
         if (string.IsNullOrWhiteSpace(cardHolderName))
             throw new ValidationsException("Card holder name cannot be empty.");
@@ -36,6 +40,10 @@ public class UserPaymentData : BaseEntity
         CardHolderName = cardHolderName;
         Address = address;
         PhoneNumber = phoneNumber;
+        City = city;
+        Department = department;
+        DepartmentCode = departmentCode;
+        CityCode = cityCode;
         LastFour = lastFour;
         UserId = userId;
         PaymentMethod = paymentMethod;
