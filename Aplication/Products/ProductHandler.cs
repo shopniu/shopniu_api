@@ -1,5 +1,6 @@
 using Shopniu_api.Aplication.Products.UseCases.CreateProduct;
 using Shopniu_api.Aplication.Products.UseCases.GetAllProducts;
+using Shopniu_api.Aplication.Products.UseCases.GetProductsByUser;
 using Shopniu_shared.Common;
 using Shopniu_api.Aplication.Products.Common.DTOs;
 
@@ -9,15 +10,23 @@ public class ProductHandler
 {
     private readonly GetAllProductsUseCase _getAllProductsUseCase;
     private readonly CreateProductUseCase _createProductUseCase;
-    public ProductHandler(CreateProductUseCase createProductUseCase, GetAllProductsUseCase getAllProductsUseCase)
+    private readonly GetProductsByUserUseCase _getProductsByUserUseCase;
+    public ProductHandler(CreateProductUseCase createProductUseCase, GetAllProductsUseCase getAllProductsUseCase, GetProductsByUserUseCase getProductsByUserUseCase)
     {
         _getAllProductsUseCase = getAllProductsUseCase;
         _createProductUseCase = createProductUseCase;
+        _getProductsByUserUseCase = getProductsByUserUseCase;
     }
 
     public async Task<ApiResponse<IEnumerable<ProductResponseDTO>>> GetAllProductsAsync()
     {
         var result = await _getAllProductsUseCase.ExecuteAsync();
+        return ApiResponse<IEnumerable<ProductResponseDTO>>.Ok(result, "Products Retrieved Successfully");
+    }
+
+    public async Task<ApiResponse<IEnumerable<ProductResponseDTO>>> GetMyProductsAsync()
+    {
+        var result = await _getProductsByUserUseCase.ExecuteAsync();
         return ApiResponse<IEnumerable<ProductResponseDTO>>.Ok(result, "Products Retrieved Successfully");
     }
 

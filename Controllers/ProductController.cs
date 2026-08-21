@@ -23,6 +23,15 @@ public class ProductController : ControllerBase
         return Ok(await _productHandler.GetAllProductsAsync());
     }
 
+    // Productos que el usuario autenticado tiene (ProductOwners). Requiere el
+    // mismo permiso que crear: es un flujo de back-office.
+    [Authorize(Policy = "product.create")]
+    [HttpGet("own")]
+    public async Task<IActionResult> GetMyProducts()
+    {
+        return Ok(await _productHandler.GetMyProductsAsync());
+    }
+
     [Authorize(Policy = "product.create")]
     [HttpPost]
     public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest dto)
