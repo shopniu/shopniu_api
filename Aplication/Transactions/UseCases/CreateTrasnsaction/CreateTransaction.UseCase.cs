@@ -17,6 +17,7 @@ public class CreateTransactionUseCase
     private readonly ITransactionRepository _transactionRepository;
     private readonly ICurrentUserService _currentUser;
     private readonly IProductRepository _productRepository;
+    private readonly IOrderRepository _orderRepository;
     private readonly IPaymentGateway _paymentGateway;
     private readonly IUserPaymentDataRepository _userPaymentDataRepository;
     private readonly IDeliveryRepository _deliveryRepository;
@@ -26,6 +27,7 @@ public class CreateTransactionUseCase
         ITransactionRepository transactionRepository,
         ICurrentUserService currentUserService,
         IProductRepository productRepository,
+        IOrderRepository orderRepository,
         IPaymentGateway paymentGateway,
         IUserPaymentDataRepository userPaymentDataRepository,
         IDeliveryRepository deliveryRepository,
@@ -34,6 +36,7 @@ public class CreateTransactionUseCase
     {
         _transactionRepository = transactionRepository;
         _productRepository = productRepository;
+        _orderRepository = orderRepository;
         _currentUser = currentUserService;
         _paymentGateway = paymentGateway;
         _userPaymentDataRepository = userPaymentDataRepository;
@@ -141,6 +144,11 @@ public class CreateTransactionUseCase
             transaction: transaction
         );
         await _deliveryRepository.CreateAsync(delivery);
+
+        // Las órdenes ya vienen agrupadas por producto; se agregan al contexto
+        // junto con el resto de los agregados y el SaveChangesAsync único del
+        // final las persiste de forma atómica con la transacción.
+        await _orderRepository.CreateRangeAsync(orders);
 
         // Create payment request by payment gateway
         var paymentRequest = new PaymentRequest(
