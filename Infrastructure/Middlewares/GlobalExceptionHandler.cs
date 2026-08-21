@@ -68,6 +68,7 @@ public class GlobalExceptionHandlerMiddleware
         return exception switch
         {
             NotFoundException => (HttpStatusCode.NotFound, "Resource Not Found"),
+            UnauthorizedException => (HttpStatusCode.Unauthorized, "Unauthorized"),
             ValidationsException => (HttpStatusCode.BadRequest, "Validation Error"),
             ConflictException => (HttpStatusCode.Conflict, "Conflict Error"),
             BusinessRuleException => (HttpStatusCode.BadRequest, "Business Rule Violation"),

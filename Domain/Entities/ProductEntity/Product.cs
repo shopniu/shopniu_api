@@ -18,10 +18,14 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
         public int Stock { get; set; } = 0;
         public string Description { get; set; }
 
+        /// <summary>Usuario (identity) que creó el producto. Null solo en
+        /// filas legacy anteriores a registrar el creador.</summary>
+        public int? UserId { get; set; }
+
         public List<Order> Orders { get; set; } = new List<Order>();
 
 
-        public Product(string name, decimal price, string imageUrl, string description, int stock)
+        public Product(string name, decimal price, string imageUrl, string description, int stock, int? userId = null)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ValidationsException("Product name cannot be empty.");
@@ -38,6 +42,7 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
             ImageUrl = imageUrl;
             Description = description;
             Stock = stock;
+            UserId = userId;
         }
 
         // Method to validate stock availability

@@ -30,11 +30,28 @@ public class ProductsRepository : IProductRepository
         return await _context.Products.ToListAsync();
     }
 
+    /// <summary>Productos que el usuario tiene (ProductOwners), sin importar
+    /// quién los creó originalmente.</summary>
+    public async Task<List<Product>> GetByOwnerIdAsync(int userId)
+    {
+        return await _context.ProductOwners
+            .Where(po => po.UserId == userId)
+            .Select(po => po.Product)
+            .ToListAsync();
+    }
+
     public async Task<Product> CreateAsync(Product product)
     {
         _context.Products.Add(product);
 
         return product;
+    }
+
+    public async Task AddOwnerAsync(ProductOwner owner)
+    {
+        _context.ProductOwners.Add(owner);
+
+        await Task.CompletedTask;
     }
 
     public async Task DeleteAsync(int id)
