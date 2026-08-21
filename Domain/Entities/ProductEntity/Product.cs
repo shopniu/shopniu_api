@@ -27,6 +27,29 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
 
         public Product(string name, decimal price, string imageUrl, string description, int stock, int? userId = null)
         {
+            ValidateDetails(name, price, imageUrl, stock);
+            Name = name;
+            Price = price;
+            ImageUrl = imageUrl;
+            Description = description;
+            Stock = stock;
+            UserId = userId;
+        }
+
+        /// <summary>Actualiza los datos editables del producto con las mismas
+        /// validaciones de creación.</summary>
+        public void Update(string name, decimal price, string imageUrl, string description, int stock)
+        {
+            ValidateDetails(name, price, imageUrl, stock);
+            Name = name;
+            Price = price;
+            ImageUrl = imageUrl;
+            Description = description;
+            Stock = stock;
+        }
+
+        private static void ValidateDetails(string name, decimal price, string imageUrl, int stock)
+        {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ValidationsException("Product name cannot be empty.");
             if (price < 0)
@@ -37,12 +60,6 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
                 throw new ValidationsException("Product image URL is invalid.");
             if (stock < 0)
                 throw new ValidationsException("Stock quantity cannot be negative.");
-            Name = name;
-            Price = price;
-            ImageUrl = imageUrl;
-            Description = description;
-            Stock = stock;
-            UserId = userId;
         }
 
         // Method to validate stock availability

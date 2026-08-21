@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Shopniu_api.Aplication.Products;
 using Shopniu_api.Aplication.Products.UseCases.CreateProduct;
+using Shopniu_api.Aplication.Products.UseCases.UpdateProduct;
 
 namespace Shopniu_api.Routes;
 
@@ -37,6 +38,16 @@ public class ProductController : ControllerBase
     public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest dto)
     {
         var response = await _productHandler.CreateProductAsync(dto);
+        return Ok(response);
+    }
+
+    // Solo el dueño del producto (ProductOwners) puede editarlo; el use case
+    // responde 403 si no lo es.
+    [Authorize(Policy = "product.update")]
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateProduct(int id, [FromBody] UpdateProductRequest dto)
+    {
+        var response = await _productHandler.UpdateProductAsync(id, dto);
         return Ok(response);
     }
 }

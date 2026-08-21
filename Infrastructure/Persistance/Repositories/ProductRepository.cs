@@ -54,6 +54,12 @@ public class ProductsRepository : IProductRepository
         await Task.CompletedTask;
     }
 
+    public async Task<bool> IsOwnedByAsync(int productId, int userId)
+    {
+        return await _context.ProductOwners
+            .AnyAsync(po => po.ProductId == productId && po.UserId == userId);
+    }
+
     public async Task DeleteAsync(int id)
     {
         var product = await _context.Products.FindAsync(id);

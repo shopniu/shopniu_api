@@ -69,6 +69,7 @@ public class GlobalExceptionHandlerMiddleware
         {
             NotFoundException => (HttpStatusCode.NotFound, "Resource Not Found"),
             UnauthorizedException => (HttpStatusCode.Unauthorized, "Unauthorized"),
+            ForbiddenException => (HttpStatusCode.Forbidden, "Forbidden"),
             ValidationsException => (HttpStatusCode.BadRequest, "Validation Error"),
             ConflictException => (HttpStatusCode.Conflict, "Conflict Error"),
             BusinessRuleException => (HttpStatusCode.BadRequest, "Business Rule Violation"),
