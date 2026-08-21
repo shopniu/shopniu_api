@@ -1,5 +1,5 @@
 
-
+using Microsoft.EntityFrameworkCore;
 using Shopniu_api.Domain.Entities.OrderEntity;
 using Shopniu_api.Domain.Repositories;
 using Shopniu_api.Infrastructure.Persistance;
@@ -26,5 +26,12 @@ public class OrderRepository : IOrderRepository
     {
         _context.Orders.AddRange(orders);
 
+    }
+
+    public async Task<List<Order>> GetByTransactionIdAsync(int transactionId)
+    {
+        return await _context.Orders
+            .Where(o => o.TransactionId == transactionId)
+            .ToListAsync();
     }
 }

@@ -70,5 +70,16 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
                 throw new InsufficientStockException(Id, requestedQuantity, Stock);
             }
         }
+
+        /// <summary>Descuenta stock por una compra confirmada (pago aprobado).</summary>
+        public void DecreaseStock(int quantity)
+        {
+            if (quantity <= 0)
+                throw new ValidationsException("Stock quantity to decrease must be positive.");
+            if (quantity > Stock)
+                throw new InsufficientStockException(Id, quantity, Stock);
+
+            Stock -= quantity;
+        }
     }
 }

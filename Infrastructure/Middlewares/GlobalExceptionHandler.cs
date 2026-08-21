@@ -3,6 +3,7 @@ using System.Net;
 using System.Text.Json;
 using Shopniu_api.Aplication.Common;
 using Shopniu_api.Domain.Exceptions;
+using Shopniu_api.Domain.Entities.ProductEntity.Exceptions;
 using Shopniu_api.Domain.Exceptions.Common;
 
 namespace Shopniu_api.Infrastructure.Middlewares;
@@ -70,6 +71,7 @@ public class GlobalExceptionHandlerMiddleware
             NotFoundException => (HttpStatusCode.NotFound, "Resource Not Found"),
             UnauthorizedException => (HttpStatusCode.Unauthorized, "Unauthorized"),
             ForbiddenException => (HttpStatusCode.Forbidden, "Forbidden"),
+            InsufficientStockException => (HttpStatusCode.Conflict, "Insufficient Stock"),
             ValidationsException => (HttpStatusCode.BadRequest, "Validation Error"),
             ConflictException => (HttpStatusCode.Conflict, "Conflict Error"),
             BusinessRuleException => (HttpStatusCode.BadRequest, "Business Rule Violation"),

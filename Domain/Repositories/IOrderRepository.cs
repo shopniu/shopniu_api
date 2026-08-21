@@ -6,4 +6,5 @@ public interface IOrderRepository
 {
     Task<Order> CreateAsync(Order order);
     Task CreateRangeAsync(IEnumerable<Order> orders);
+    Task<List<Order>> GetByTransactionIdAsync(int transactionId);
 }
