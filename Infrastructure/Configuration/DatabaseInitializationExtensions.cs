@@ -26,7 +26,7 @@ public static class DatabaseInitializationExtensions
 
         if (seedOnStartup)
         {
-            await ProductSeeder.SeedAsync(dbContext);
+            await ProductSeeder.SeedAsync(dbContext, app.Configuration);
         }
 
         return app;
