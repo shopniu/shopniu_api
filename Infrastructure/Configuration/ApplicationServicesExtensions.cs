@@ -1,5 +1,7 @@
 
 using FluentValidation;
+using Shopniu_api.Aplication.Dashboard;
+using Shopniu_api.Aplication.Dashboard.UseCases.GetDashboardSummary;
 using Shopniu_api.Aplication.Payments;
 using Shopniu_api.Aplication.Payments.UseCases.GetPaymentMethods;
 using Shopniu_api.Aplication.Payments.UseCases.ProcessPaymentWebhook;
@@ -22,6 +24,9 @@ public static class ApplicationServicesExtensions
         services.AddScoped<CreateProductUseCase>();
         services.AddScoped<GetProductsByUserUseCase>();
         services.AddScoped<UpdateProductUseCase>();
+
+        services.AddScoped<DashboardHandler>();
+        services.AddScoped<GetDashboardSummaryUseCase>();
 
         services.AddScoped<TransactionHandler>();
         services.AddScoped<CreateTransactionUseCase>();
