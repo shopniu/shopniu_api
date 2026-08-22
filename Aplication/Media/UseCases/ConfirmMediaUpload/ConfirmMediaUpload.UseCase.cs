@@ -61,12 +61,21 @@ public class ConfirmMediaUploadUseCase
         }
 
         var imageInfo = DecodeImage(originalBytes, request.BlobPath);
+        var imageWidth = imageInfo.Bitmap.Width;
+        var imageHeight = imageInfo.Bitmap.Height;
 
         var webPath = _storage.BuildVariantPath(request.BlobPath, "web");
         var thumbPath = _storage.BuildVariantPath(request.BlobPath, "thumb");
 
-        await UploadVariantAsync(webPath, imageInfo.Bitmap, WebMaxSize, 80, cancellationToken);
-        await UploadVariantAsync(thumbPath, imageInfo.Bitmap, ThumbMaxSize, 75, cancellationToken);
+        try
+        {
+            await UploadVariantAsync(webPath, imageInfo.Bitmap, WebMaxSize, 80, cancellationToken);
+            await UploadVariantAsync(thumbPath, imageInfo.Bitmap, ThumbMaxSize, 75, cancellationToken);
+        }
+        finally
+        {
+            imageInfo.Bitmap.Dispose();
+        }
 
         var product = request.ProductId is { } productId
             ? await _productRepository.GetByIdAsync(productId)
@@ -92,8 +101,8 @@ public class ConfirmMediaUploadUseCase
             ThumbUrl = _storage.ResolvePublicUrl(thumbPath),
             ContentType = imageInfo.MimeType,
             Size = originalBytes.Length,
-            Width = imageInfo.Bitmap.Width,
-            Height = imageInfo.Bitmap.Height,
+            Width = imageWidth,
+            Height = imageHeight,
             UploadedBy = userId
         };
 
@@ -138,13 +147,22 @@ public class ConfirmMediaUploadUseCase
             throw new ValidationsException($"File '{blobPath}' is not a supported image.");
         }
 
-        using var decoded = SKBitmap.Decode(codec);
+        var decoded = SKBitmap.Decode(codec);
         if (decoded == null)
         {
             throw new ValidationsException($"File '{blobPath}' contains invalid image data.");
         }
 
         var bitmap = NormalizeOrientation(decoded, codec.EncodedOrigin);
+
+        // Si se generó un bitmap nuevo (imagen orientada), el original ya no
+        // hace falta; si se devuelve el mismo, el caller se encarga de
+        // disponerlo (no liberarlo acá: se usaría un bitmap descartado).
+        if (!ReferenceEquals(bitmap, decoded))
+        {
+            decoded.Dispose();
+        }
+
         return (bitmap, MapMimeType(codec.EncodedFormat));
     }
 
