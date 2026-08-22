@@ -25,7 +25,7 @@ Secciones clave en `appsettings.json` (sobreescribibles por variables de entorno
 | `Wompi:IntegrityKey` / `PublicKey` / `PrivateKey` / `EventsKey` / `ApiUrl` | Integración de pagos (sandbox en dev) |
 | `Identity:Issuer` | Issuer de identity (`https://localhost:7145/` en dev) |
 | `Scalability:RateLimiting` | Límites de rate limiting |
-| `Database:Migration/Seeding:RunOnStartup` | Migraciones/seeders al iniciar (false por defecto) |
+| `Database:Migration/Seeding:RunOnStartup` | Migraciones al iniciar (true por defecto; idempotente). Seeding false en producción |
 | `Storage:AccountName` / `ContainerName` / `PublicBaseUrl` | Blob Storage para media (contenedor público `media`) |
 | `Storage:UseConnectionString` / `ConnectionString` | Modo dev con Azurite (solo local) |
 | `Storage:ManagedIdentityClientId` | Managed Identity (producción) para firmar SAS |
@@ -151,7 +151,7 @@ az containerapp identity assign -n shopniu-api -g shopniu --user-assigned <mi-re
 - [ ] `Wompi__*` con las claves correctas (probar webhook con firma).
 - [ ] `Storage__*` con la cuenta, base URL pública y Managed Identity correctas.
 - [ ] Storage account con acceso anónimo habilitado, contenedor `media` en lectura pública y CORS con `PUT`.
-- [ ] Migraciones aplicadas en el ambiente destino.
+- [ ] Migraciones al iniciar: `Database:Migration:RunOnStartup=true` (default) las aplica automáticamente; verificar la tabla `MediaAssets` tras el primer arranque.
 - [ ] `/health` responde 200.
 - [ ] HSTS/forwarded headers activos (no-Development).
 - [ ] Sin valores sensibles en `appsettings` ni logs.
