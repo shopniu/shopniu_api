@@ -1,3 +1,4 @@
+using Shopniu_api.Aplication.Common.Ports.Storage;
 using Shopniu_api.Infrastructure.Middlewares;
 
 namespace Shopniu_api.Infrastructure.Configuration.Pipeline;
@@ -8,6 +9,15 @@ public static class ApiPipelineExtensions
     {
         // Initialize the database if required (seeders and migrations)   
         await app.InitializeDatabaseAsync();
+
+        // En desarrollo el emulador (Azurite) parte vacío: crear el contenedor
+        // público de media si no existe. En producción se provisiona en el portal.
+        if (app.Environment.IsDevelopment())
+        {
+            using var scope = app.Services.CreateScope();
+            var storage = scope.ServiceProvider.GetRequiredService<IBlobStorageService>();
+            await storage.EnsureContainerExistsAsync();
+        }
 
         app.UseGlobalExceptionHandler();
         app.UseForwardedHeaders();

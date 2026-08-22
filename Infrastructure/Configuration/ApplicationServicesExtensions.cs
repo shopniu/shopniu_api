@@ -2,6 +2,12 @@
 using FluentValidation;
 using Shopniu_api.Aplication.Dashboard;
 using Shopniu_api.Aplication.Dashboard.UseCases.GetDashboardSummary;
+using Shopniu_api.Aplication.Media;
+using Shopniu_api.Aplication.Media.UseCases.ConfirmMediaUpload;
+using Shopniu_api.Aplication.Media.UseCases.CreateMediaUpload;
+using Shopniu_api.Aplication.Media.UseCases.DeleteMedia;
+using Shopniu_api.Aplication.Media.UseCases.LinkMedia;
+using Shopniu_api.Aplication.Media.UseCases.SetMainMedia;
 using Shopniu_api.Aplication.Payments;
 using Shopniu_api.Aplication.Payments.UseCases.GetPaymentMethods;
 using Shopniu_api.Aplication.Payments.UseCases.ProcessPaymentWebhook;
@@ -35,6 +41,13 @@ public static class ApplicationServicesExtensions
         services.AddScoped<PaymentsHandler>();
         services.AddScoped<ProcessPaymentWebhookUseCase>();
         services.AddScoped<GetPaymentMethodsUseCase>();
+
+        services.AddScoped<MediaHandler>();
+        services.AddScoped<CreateMediaUploadUseCase>();
+        services.AddScoped<ConfirmMediaUploadUseCase>();
+        services.AddScoped<SetMainMediaUseCase>();
+        services.AddScoped<LinkMediaUseCase>();
+        services.AddScoped<DeleteMediaUseCase>();
 
         services.AddValidatorsFromAssembly(typeof(ApplicationServicesExtensions).Assembly);
 

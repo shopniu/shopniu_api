@@ -12,6 +12,7 @@ builder.Services
     .AddRepositoryServices()
     .AddPaymentServices(builder.Configuration)
     .AddIntegration(builder.Configuration)
+    .AddStorageServices(builder.Configuration)
     .AddApplicationServices();
 
 var app = builder.Build();

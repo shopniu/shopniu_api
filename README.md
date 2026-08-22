@@ -11,6 +11,8 @@ API de negocio de ShopNiu: catálogo, usuarios, transacciones y pagos (Wompi). A
 - FluentValidation.DependencyInjectionExtensions 12.1.1
 - Microsoft.Extensions.Http.Resilience 10.8.0
 - Swashbuckle 10.2.3
+- Azure.Storage.Blobs / Azure.Identity (media en Blob Storage, SAS + Managed Identity)
+- SkiaSharp (variantes de imagen: web/thumb)
 - Shopniu.Shared 1.0.3 (paquete privado)
 
 ## Configuración
@@ -24,6 +26,10 @@ Secciones clave en `appsettings.json` (sobreescribibles por variables de entorno
 | `Identity:Issuer` | Issuer de identity (`https://localhost:7145/` en dev) |
 | `Scalability:RateLimiting` | Límites de rate limiting |
 | `Database:Migration/Seeding:RunOnStartup` | Migraciones/seeders al iniciar (false por defecto) |
+| `Storage:AccountName` / `ContainerName` / `PublicBaseUrl` | Blob Storage para media (contenedor público `media`) |
+| `Storage:UseConnectionString` / `ConnectionString` | Modo dev con Azurite (solo local) |
+| `Storage:ManagedIdentityClientId` | Managed Identity (producción) para firmar SAS |
+| `Storage:SasDurationMinutes` / `MaxSizeBytes` / `AllowedContentTypes` | Límites de upload |
 | `GET /health` | Endpoint de health check para load balancers |
 
 **Repos:** https://github.com/DanielAmado11/shopniu_api (rama `main`).
@@ -44,6 +50,32 @@ docker compose up -d --build shopniu-api
 
 Puerto: **8080 (host) → 8080 (contenedor)**. Requiere Postgres (`shopniu_api_db`) e identity para validar tokens.
 
+### Media en local (Azurite)
+
+`docker compose` levanta un contenedor **Azurite** (emulador de Blob Storage) en el puerto 10000. El API lo usa automáticamente en `Development` (connection string + URLs públicas por `http://localhost:10000/devstoreaccount1/media/...`). Al arrancar, el API crea el contenedor `media` si no existe.
+
+Si corrés la API con `dotnet run` sin docker, levantá Azurite aparte:
+
+```powershell
+docker run -d --name azurite -p 10000:10000 mcr.microsoft.com/azure-storage/azurite
+```
+
+### Media (imágenes)
+
+El modelo de media vive en `Domain/Entities/MediaEntity/MediaAsset.cs`: variantes `original`/`web`/`thumb`, vínculo opcional a `Product` (`ProductId`) y flag `IsMain` que alimenta `Product.ImageUrl`. Las imágenes se guardan en un **contenedor público** de Blob Storage; el front sube directo a Blob con una **SAS de escritura efímera** emitida por este servicio (el binario nunca pasa por el gateway). Al confirmar, se generan las variantes con **SkiaSharp** (web 1280px, thumb 320px, JPEG).
+
+Endpoints (`/api/v1/media`, política `product.create`):
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| POST | `/api/v1/media/upload-url` | Devuelve `{ uploadUrl (SAS), blobPath, publicUrl }` |
+| POST | `/api/v1/media` | Confirma el upload: valida imagen, genera variantes, persiste `MediaAsset` (opcional `productId`/`isMain`) |
+| POST | `/api/v1/media/{id}/main` | Marca la imagen como principal del producto (sincroniza `Product.ImageUrl`) |
+| POST | `/api/v1/media/link` | Vincula media huérfana a un producto (`{ productId, mediaIds }`) |
+| DELETE | `/api/v1/media/{id}` | Borra blobs (original + variantes) y el registro |
+
+Flujo típico del front: pedir `upload-url` → `PUT` directo a Blob → `POST /media` (confirmar) → si el producto no existía aún, `POST /media/link`. La primera imagen de un producto se vuelve la principal automáticamente.
+
 ### Paquete privado (auth)
 
 Igual que en `shopniu-identity`: el `nuget.config` lee `%GITHUB_PACKAGES_TOKEN%`; el PAT (`read:packages`) va como variable de entorno local y como secret `NUGET_PACKAGES_TOKEN` en CI.
@@ -57,6 +89,9 @@ Wompi__PublicKey
 Wompi__PrivateKey
 Wompi__ApiUrl
 Wompi__EventsKey
+Storage__AccountName
+Storage__PublicBaseUrl
+Storage__ManagedIdentityClientId
 ```
 
 Para desarrollo local con User Secrets:
@@ -88,14 +123,34 @@ Workflow `.github/workflows/ci.yml` (push a `main` y PRs):
 - **Resource group:** `shopniu`
 - **Imagen:** `ghcr.io/danielamado11/shopniu_api:<sha>`, `targetPort 8080`
 - **Registry GHCR:** `ghcr.io`, usuario `DanielAmado11`, password `NUGET_PACKAGES_TOKEN`
-- **Env vars/secrets** (connection string de producción, `Wompi__*`, `Identity__Issuer`): configuradas en el portal de Azure.
+- **Env vars/secrets** (connection string de producción, `Wompi__*`, `Identity__Issuer`, `Storage__*`): configuradas en el portal de Azure.
 - **Secrets de GitHub (org):** `AZURE_CREDENTIALS` y `NUGET_PACKAGES_TOKEN`.
+
+### Media en producción (recursos Azure)
+
+- **Storage account** `shopniumedia` (Standard_LRS, hot, *anonymous blob access* habilitado) con contenedor `media` en **lectura pública** (`Blob`).
+- **Managed identity** `id-shopniu-media` con rol **Storage Blob Data Contributor** sobre la cuenta, asociada a la container app. El API firma SAS con user-delegation (sin connection strings).
+- **CORS** en el storage account: `AllowedOrigins` = origen de `shopniu-web`, `AllowedMethods` = `PUT` (necesario para el upload directo desde el navegador).
+
+Provisionar (una vez):
+
+```powershell
+az storage account create -n shopniumedia -g shopniu -l westus --sku Standard_LRS --kind StorageV2 --allow-blob-public-access true
+az storage container create -n media --account-name shopniumedia --public-access blob --auth-mode login
+az identity create -n id-shopniu-media -g shopniu
+az role assignment create --assignee <mi-client-id> --role "Storage Blob Data Contributor" --scope /subscriptions/<sub>/resourceGroups/shopniu/providers/Microsoft.Storage/storageAccounts/shopniumedia
+az containerapp identity assign -n shopniu-api -g shopniu --user-assigned <mi-resource-id>
+# En la container app: env vars Storage__AccountName, Storage__PublicBaseUrl, Storage__ManagedIdentityClientId
+# CORS: az storage cors add ...
+```
 
 ### Checklist pre-deploy
 
 - [ ] Variables de entorno definidas en el host (sección arriba).
 - [ ] `ConnectionStrings__DefaultConnection` apuntando a la Postgres de Azure.
 - [ ] `Wompi__*` con las claves correctas (probar webhook con firma).
+- [ ] `Storage__*` con la cuenta, base URL pública y Managed Identity correctas.
+- [ ] Storage account con acceso anónimo habilitado, contenedor `media` en lectura pública y CORS con `PUT`.
 - [ ] Migraciones aplicadas en el ambiente destino.
 - [ ] `/health` responde 200.
 - [ ] HSTS/forwarded headers activos (no-Development).
@@ -105,6 +160,9 @@ Workflow `.github/workflows/ci.yml` (push a `main` y PRs):
 
 - **401 / NU1301 en restore:** variable `GITHUB_PACKAGES_TOKEN` no definida o PAT expirado.
 - **401 en endpoints:** el token no es válido o el issuer (`Identity__Issuer`) no coincide con identity.
+- **403 en upload/confirm:** el permiso `product.create` no está en el token (faltó re-login) o la SAS venció (10 min por defecto).
+- **403 de Managed Identity al firmar SAS:** el rol `Storage Blob Data Contributor` no está asignado a `id-shopniu-media` sobre la cuenta.
+- **CORS al subir desde el navegador:** falta `PUT` en `AllowedMethods` o el origen del front en `AllowedOrigins` del storage account.
 - **`dotnet format --verify-no-changes` falla en CI:** correr `dotnet format` local y commitear.
 
 ## Convención de commits

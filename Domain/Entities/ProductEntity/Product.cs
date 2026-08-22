@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Shopniu_api.Domain.Exceptions.Common;
 using Shopniu_api.Domain.Entities.common;
+using Shopniu_api.Domain.Entities.MediaEntity;
 using Shopniu_api.Domain.Entities.OrderEntity;
 using Shopniu_api.Domain.Entities.ProductEntity.Exceptions;
 
@@ -23,6 +24,7 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
         public int? UserId { get; set; }
 
         public List<Order> Orders { get; set; } = new List<Order>();
+        public List<MediaAsset> Media { get; set; } = new List<MediaAsset>();
 
 
         public Product(string name, decimal price, string imageUrl, string description, int stock, int? userId = null)

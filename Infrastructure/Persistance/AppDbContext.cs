@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Shopniu_api.Domain.Entities.DeliveryEntity;
+using Shopniu_api.Domain.Entities.MediaEntity;
 using Shopniu_api.Domain.Entities.OrderEntity;
 using Shopniu_api.Domain.Entities.TransactionEntity;
 using Shopniu_api.Domain.Entities.PaymentDetailsEntity;
 using Shopniu_api.Domain.Entities.ProductEntity;
-using Shopniu_api.Domain.Entities.DeliveryEntity;
 using Shopniu_api.Domain.Entities.UserPaymentDataEntity;
 
 namespace Shopniu_api.Infrastructure.Persistance;
@@ -22,6 +23,7 @@ public class AppDbContext : DbContext
     public DbSet<Delivery> Deliveries => Set<Delivery>();
     public DbSet<UserPaymentData> UserPaymentData => Set<UserPaymentData>();
     public DbSet<ProductOwner> ProductOwners => Set<ProductOwner>();
+    public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
