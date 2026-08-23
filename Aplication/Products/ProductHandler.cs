@@ -21,9 +21,9 @@ public class ProductHandler
         _updateProductUseCase = updateProductUseCase;
     }
 
-    public async Task<ApiResponse<IEnumerable<ProductResponseDTO>>> GetAllProductsAsync()
+    public async Task<ApiResponse<IEnumerable<ProductResponseDTO>>> GetAllProductsAsync(bool includeMedia = false)
     {
-        var result = await _getAllProductsUseCase.ExecuteAsync();
+        var result = await _getAllProductsUseCase.ExecuteAsync(includeMedia);
         return ApiResponse<IEnumerable<ProductResponseDTO>>.Ok(result, "Products Retrieved Successfully");
     }
 

@@ -4,7 +4,7 @@ namespace Shopniu_api.Domain.Repositories
 {
     public interface IProductRepository
     {
-        Task<List<Product>> GetAllAsync();
+        Task<List<Product>> GetAllAsync(bool includeMedia = false);
         Task<List<Product>> GetByOwnerIdAsync(int userId);
         Task<Product?> GetByIdAsync(int id);
         Task<List<Product>> GetByIdsAsync(List<int> ids);

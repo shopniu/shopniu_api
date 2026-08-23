@@ -25,9 +25,14 @@ public class ProductsRepository : IProductRepository
     {
         return await _context.Products.Where(p => ids.Contains(p.Id)).ToListAsync();
     }
-    public async Task<List<Product>> GetAllAsync()
+    public async Task<List<Product>> GetAllAsync(bool includeMedia = false)
     {
-        return await _context.Products.ToListAsync();
+        var query = _context.Products.AsQueryable();
+        if (includeMedia)
+        {
+            query = query.Include(p => p.Media);
+        }
+        return await query.ToListAsync();
     }
 
     /// <summary>Productos que el usuario tiene (ProductOwners), sin importar

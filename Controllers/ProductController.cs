@@ -19,9 +19,9 @@ public class ProductController : ControllerBase
 
 
     [HttpGet]
-    public async Task<IActionResult> GetAllProducts()
+    public async Task<IActionResult> GetAllProducts([FromQuery] bool includeMedia = false)
     {
-        return Ok(await _productHandler.GetAllProductsAsync());
+        return Ok(await _productHandler.GetAllProductsAsync(includeMedia));
     }
 
     // Productos que el usuario autenticado tiene (ProductOwners). Requiere el

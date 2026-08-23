@@ -15,9 +15,9 @@ public class GetAllProductsUseCase
         _productRepository = productRepository;
     }
 
-    public async Task<IEnumerable<ProductResponseDTO>> ExecuteAsync()
+    public async Task<IEnumerable<ProductResponseDTO>> ExecuteAsync(bool includeMedia = false)
     {
-        var products = await _productRepository.GetAllAsync();
-        return ProductResponseDTO.FromEntities(products);
+        var products = await _productRepository.GetAllAsync(includeMedia);
+        return ProductResponseDTO.FromEntities(products, includeMedia);
     }
 }
