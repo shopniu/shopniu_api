@@ -1,6 +1,13 @@
 # 1. Imagen base para la ejecución (Runtime)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 WORKDIR /app
+
+# libSkiaSharp.so enlaza dinámicamente libfontconfig (falta en la imagen slim);
+# sin ella la confirmación de imágenes revienta con DllNotFoundException.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libfontconfig1 \
+    && rm -rf /var/lib/apt/lists/*
+
 EXPOSE 8080
 EXPOSE 8081
 
