@@ -23,5 +23,20 @@ public class CreateProductValidator : AbstractValidator<CreateProductRequest>
 
         RuleFor(x => x.Stock)
             .GreaterThanOrEqualTo(0).WithMessage("Stock  must be zero or greater.");
+
+        RuleFor(x => x.CostPrice)
+            .GreaterThanOrEqualTo(0).When(x => x.CostPrice.HasValue)
+            .WithMessage("Cost price must be zero or greater.");
+
+        RuleFor(x => x.LeadTimeDays)
+            .GreaterThan(0).When(x => x.LeadTimeDays.HasValue)
+            .WithMessage("Lead time days must be greater than zero.");
+
+        RuleFor(x => x.SupplierId)
+            .GreaterThan(0).When(x => x.SupplierId.HasValue)
+            .WithMessage("Supplier ID must be a positive integer.");
+
+        RuleFor(x => x.SupplierName)
+            .MaximumLength(200).WithMessage("Supplier name must not exceed 200 characters.");
     }
 }
