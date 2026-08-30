@@ -27,5 +27,7 @@ public class DeliveryConfiguration : IEntityTypeConfiguration<Delivery>
             .HasMaxLength(10);
         builder.Property(d => d.Status)
             .IsRequired();
+        builder.Property(d => d.TrackingNumber)
+            .HasMaxLength(200);
     }
 }

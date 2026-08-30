@@ -26,4 +26,29 @@ public class DeliveryRepository : IDeliveryRepository
         return await _context.Deliveries
             .FirstOrDefaultAsync(d => d.TransactionId == transactionId);
     }
+
+    public async Task<List<Delivery>> GetAllWithDetailsAsync()
+    {
+        return await _context.Deliveries
+            .Include(d => d.Transaction)
+                .ThenInclude(t => t.Orders)
+                .ThenInclude(o => o.Product)
+            .OrderByDescending(d => d.CreatedAt)
+            .ToListAsync();
+    }
+
+    public async Task<Delivery?> GetByTransactionIdWithDetailsAsync(int transactionId)
+    {
+        return await _context.Deliveries
+            .Include(d => d.Transaction)
+                .ThenInclude(t => t.Orders)
+                .ThenInclude(o => o.Product)
+            .FirstOrDefaultAsync(d => d.TransactionId == transactionId);
+    }
+
+    public Task UpdateAsync(Delivery delivery)
+    {
+        _context.Deliveries.Update(delivery);
+        return Task.CompletedTask;
+    }
 }

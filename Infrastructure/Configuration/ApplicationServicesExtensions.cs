@@ -8,6 +8,9 @@ using Shopniu_api.Aplication.Media.UseCases.CreateMediaUpload;
 using Shopniu_api.Aplication.Media.UseCases.DeleteMedia;
 using Shopniu_api.Aplication.Media.UseCases.LinkMedia;
 using Shopniu_api.Aplication.Media.UseCases.SetMainMedia;
+using Shopniu_api.Aplication.Orders;
+using Shopniu_api.Aplication.Orders.UseCases.ListOrders;
+using Shopniu_api.Aplication.Orders.UseCases.UpdateFulfillmentStatus;
 using Shopniu_api.Aplication.Payments;
 using Shopniu_api.Aplication.Payments.UseCases.GetPaymentMethods;
 using Shopniu_api.Aplication.Payments.UseCases.ProcessPaymentWebhook;
@@ -64,6 +67,10 @@ public static class ApplicationServicesExtensions
         services.AddScoped<SetMainMediaUseCase>();
         services.AddScoped<LinkMediaUseCase>();
         services.AddScoped<DeleteMediaUseCase>();
+
+        services.AddScoped<OrderHandler>();
+        services.AddScoped<ListOrdersUseCase>();
+        services.AddScoped<UpdateFulfillmentStatusUseCase>();
 
         services.AddValidatorsFromAssembly(typeof(ApplicationServicesExtensions).Assembly);
 

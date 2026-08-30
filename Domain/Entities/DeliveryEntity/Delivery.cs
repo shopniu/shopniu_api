@@ -25,6 +25,11 @@ public class Delivery : BaseEntity
     public string DepartmentCode { get; set; } = null!;
     public string CityCode { get; set; } = null!;
     public DeliveryStatus Status { get; set; }
+
+    /// <summary>Número de seguimiento de la paquetería (se setea al marcar
+    /// como enviado).</summary>
+    public string? TrackingNumber { get; set; }
+
     public Transaction Transaction { get; set; } = null!;
 
     private Delivery() { }
@@ -58,5 +63,28 @@ public class Delivery : BaseEntity
             TransactionStatus.FAILED or TransactionStatus.CANCELED or TransactionStatus.REFUNDED => DeliveryStatus.CANCELLED,
             _ => DeliveryStatus.PENDING
         };
+    }
+
+    /// <summary>Marca el despacho como enviado con número de seguimiento.</summary>
+    public void MarkShipped(string? trackingNumber)
+    {
+        if (Status != DeliveryStatus.ACTIVE)
+            throw new ValidationsException("Only active deliveries can be marked as shipped.");
+        if (string.IsNullOrWhiteSpace(trackingNumber))
+            throw new ValidationsException("Tracking number is required to mark the delivery as shipped.");
+
+        Status = DeliveryStatus.SHIPPED;
+        TrackingNumber = trackingNumber;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>Marca la entrega como realizada.</summary>
+    public void MarkDelivered()
+    {
+        if (Status != DeliveryStatus.SHIPPED)
+            throw new ValidationsException("Only shipped deliveries can be marked as delivered.");
+
+        Status = DeliveryStatus.DELIVERED;
+        UpdatedAt = DateTime.UtcNow;
     }
 }
