@@ -1,5 +1,6 @@
 using Shopniu_api.Aplication.Common.Ports.Identity;
 using Shopniu_api.Aplication.Suppliers.UseCases.CreateSupplier;
+using Shopniu_api.Aplication.Suppliers.UseCases.ListSupplierSyncLogs;
 using Shopniu_api.Aplication.Suppliers.UseCases.ListSuppliers;
 using Shopniu_api.Aplication.Suppliers.UseCases.SyncSupplierCatalog;
 using Shopniu_api.Aplication.Suppliers.UseCases.UpdateSupplier;
@@ -14,6 +15,7 @@ public class SupplierHandler
     private readonly CreateSupplierUseCase _createSupplierUseCase;
     private readonly UpdateSupplierUseCase _updateSupplierUseCase;
     private readonly SyncSupplierCatalogUseCase _syncSupplierCatalogUseCase;
+    private readonly ListSupplierSyncLogsUseCase _listSupplierSyncLogsUseCase;
     private readonly ICurrentUserService _currentUser;
 
     public SupplierHandler(
@@ -21,12 +23,14 @@ public class SupplierHandler
         CreateSupplierUseCase createSupplierUseCase,
         UpdateSupplierUseCase updateSupplierUseCase,
         SyncSupplierCatalogUseCase syncSupplierCatalogUseCase,
+        ListSupplierSyncLogsUseCase listSupplierSyncLogsUseCase,
         ICurrentUserService currentUser)
     {
         _listSuppliersUseCase = listSuppliersUseCase;
         _createSupplierUseCase = createSupplierUseCase;
         _updateSupplierUseCase = updateSupplierUseCase;
         _syncSupplierCatalogUseCase = syncSupplierCatalogUseCase;
+        _listSupplierSyncLogsUseCase = listSupplierSyncLogsUseCase;
         _currentUser = currentUser;
     }
 
@@ -52,5 +56,11 @@ public class SupplierHandler
     {
         var result = await _syncSupplierCatalogUseCase.ExecuteAsync(id, _currentUser.UserId);
         return ApiResponse<SyncSupplierCatalogResult>.Ok(result, "Supplier catalog synced successfully");
+    }
+
+    public async Task<ApiResponse<IEnumerable<SupplierSyncLogDTO>>> GetSyncLogsAsync(int id)
+    {
+        var result = await _listSupplierSyncLogsUseCase.ExecuteAsync(id);
+        return ApiResponse<IEnumerable<SupplierSyncLogDTO>>.Ok(result, "Supplier sync logs retrieved successfully");
     }
 }

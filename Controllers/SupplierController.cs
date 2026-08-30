@@ -47,4 +47,12 @@ public class SupplierController : ControllerBase
     {
         return Ok(await _supplierHandler.SyncSupplierAsync(id));
     }
+
+    // Historial de corridas de sync del proveedor (monitoreo de errores).
+    [Authorize(Policy = "product.create")]
+    [HttpGet("{id:int}/sync-logs")]
+    public async Task<IActionResult> GetSyncLogs(int id)
+    {
+        return Ok(await _supplierHandler.GetSyncLogsAsync(id));
+    }
 }

@@ -15,6 +15,7 @@ public static class RepositoryServicesExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IProductRepository, ProductsRepository>();
         services.AddScoped<ISupplierRepository, SupplierRepository>();
+        services.AddScoped<ISupplierSyncLogRepository, SupplierSyncLogRepository>();
         services.AddScoped<ISupplierCatalogProvider, CsvSupplierCatalogProvider>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();

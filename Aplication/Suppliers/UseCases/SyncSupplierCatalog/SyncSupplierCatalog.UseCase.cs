@@ -23,6 +23,7 @@ public class SyncSupplierCatalogUseCase
 {
     private readonly ISupplierRepository _supplierRepository;
     private readonly IProductRepository _productRepository;
+    private readonly ISupplierSyncLogRepository _syncLogRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISupplierCatalogProvider _catalogProvider;
     private readonly IConfiguration _configuration;
@@ -31,12 +32,14 @@ public class SyncSupplierCatalogUseCase
     public SyncSupplierCatalogUseCase(
         ISupplierRepository supplierRepository,
         IProductRepository productRepository,
+        ISupplierSyncLogRepository syncLogRepository,
         IUnitOfWork unitOfWork,
         ISupplierCatalogProvider catalogProvider,
         IConfiguration configuration)
     {
         _supplierRepository = supplierRepository;
         _productRepository = productRepository;
+        _syncLogRepository = syncLogRepository;
         _unitOfWork = unitOfWork;
         _catalogProvider = catalogProvider;
         _configuration = configuration;
@@ -54,67 +57,93 @@ public class SyncSupplierCatalogUseCase
         var ownerId = actingUserId
             ?? _configuration.GetValue("Database:Seeding:AdminUserId", 1);
 
-        var items = await _catalogProvider.FetchAsync(supplier, cancellationToken);
-        var created = 0;
-        var updated = 0;
-        var errors = new List<string>();
-
-        foreach (var item in items)
+        try
         {
-            try
-            {
-                var price = Math.Round(item.CostPrice * (1 + _markupPercent / 100m), 2);
-                var existing = await _productRepository.GetBySupplierAndSkuAsync(supplier.Id, item.Sku);
+            var items = await _catalogProvider.FetchAsync(supplier, cancellationToken);
+            var created = 0;
+            var updated = 0;
+            var errors = new List<string>();
 
-                if (existing is null)
+            foreach (var item in items)
+            {
+                try
                 {
-                    var product = await _productRepository.CreateAsync(new Product(
-                        name: item.Name,
-                        price: price,
-                        imageUrl: item.ImageUrl,
-                        description: item.Description,
-                        stock: item.Stock,
-                        userId: ownerId,
-                        sourcing: ProductSourcing.External,
-                        costPrice: item.CostPrice,
-                        supplierName: supplier.Name,
-                        leadTimeDays: item.LeadTimeDays,
-                        supplierId: supplier.Id,
-                        supplierSku: item.Sku
-                    ));
-                    await _productRepository.AddOwnerAsync(new ProductOwner
+                    var price = Math.Round(item.CostPrice * (1 + _markupPercent / 100m), 2);
+                    var existing = await _productRepository.GetBySupplierAndSkuAsync(supplier.Id, item.Sku);
+
+                    if (existing is null)
                     {
-                        Product = product,
-                        UserId = ownerId
-                    });
-                    created++;
+                        var product = await _productRepository.CreateAsync(new Product(
+                            name: item.Name,
+                            price: price,
+                            imageUrl: item.ImageUrl,
+                            description: item.Description,
+                            stock: item.Stock,
+                            userId: ownerId,
+                            sourcing: ProductSourcing.External,
+                            costPrice: item.CostPrice,
+                            supplierName: supplier.Name,
+                            leadTimeDays: item.LeadTimeDays,
+                            supplierId: supplier.Id,
+                            supplierSku: item.Sku
+                        ));
+                        await _productRepository.AddOwnerAsync(new ProductOwner
+                        {
+                            Product = product,
+                            UserId = ownerId
+                        });
+                        created++;
+                    }
+                    else
+                    {
+                        existing.Update(
+                            name: item.Name,
+                            price: price,
+                            imageUrl: item.ImageUrl,
+                            description: item.Description,
+                            stock: item.Stock,
+                            costPrice: item.CostPrice,
+                            leadTimeDays: item.LeadTimeDays
+                        );
+                        existing.Sourcing = ProductSourcing.External;
+                        existing.SupplierId = supplier.Id;
+                        existing.SupplierSku = item.Sku;
+                        existing.SupplierName = supplier.Name;
+                        await _productRepository.UpdateAsync(existing);
+                        updated++;
+                    }
                 }
-                else
+                catch (Exception ex) when (ex is ValidationsException or ValidationException)
                 {
-                    existing.Update(
-                        name: item.Name,
-                        price: price,
-                        imageUrl: item.ImageUrl,
-                        description: item.Description,
-                        stock: item.Stock,
-                        costPrice: item.CostPrice,
-                        leadTimeDays: item.LeadTimeDays
-                    );
-                    existing.Sourcing = ProductSourcing.External;
-                    existing.SupplierId = supplier.Id;
-                    existing.SupplierSku = item.Sku;
-                    existing.SupplierName = supplier.Name;
-                    await _productRepository.UpdateAsync(existing);
-                    updated++;
+                    errors.Add($"{item.Sku} ({item.Name}): {ex.Message}");
                 }
             }
-            catch (Exception ex) when (ex is ValidationsException or ValidationException)
-            {
-                errors.Add($"{item.Sku} ({item.Name}): {ex.Message}");
-            }
-        }
 
-        await _unitOfWork.SaveChangesAsync();
-        return new SyncSupplierCatalogResult(created, updated, errors);
+            await _unitOfWork.SaveChangesAsync();
+
+            await _syncLogRepository.CreateAsync(new SupplierSyncLog(
+                supplier.Id,
+                DateTime.UtcNow,
+                succeeded: true,
+                created,
+                updated,
+                errors));
+
+            await _unitOfWork.SaveChangesAsync();
+            return new SyncSupplierCatalogResult(created, updated, errors);
+        }
+        catch (Exception ex)
+        {
+            await _syncLogRepository.CreateAsync(new SupplierSyncLog(
+                supplier.Id,
+                DateTime.UtcNow,
+                succeeded: false,
+                0,
+                0,
+                new[] { ex.Message }));
+
+            await _unitOfWork.SaveChangesAsync();
+            throw;
+        }
     }
 }

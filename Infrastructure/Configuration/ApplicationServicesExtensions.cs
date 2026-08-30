@@ -22,6 +22,7 @@ using Shopniu_api.Aplication.Products.UseCases.ImportProducts;
 using Shopniu_api.Aplication.Products.UseCases.UpdateProduct;
 using Shopniu_api.Aplication.Suppliers;
 using Shopniu_api.Aplication.Suppliers.UseCases.CreateSupplier;
+using Shopniu_api.Aplication.Suppliers.UseCases.ListSupplierSyncLogs;
 using Shopniu_api.Aplication.Suppliers.UseCases.ListSuppliers;
 using Shopniu_api.Aplication.Suppliers.UseCases.SyncSupplierCatalog;
 using Shopniu_api.Aplication.Suppliers.UseCases.UpdateSupplier;
@@ -48,6 +49,7 @@ public static class ApplicationServicesExtensions
         services.AddScoped<CreateSupplierUseCase>();
         services.AddScoped<UpdateSupplierUseCase>();
         services.AddScoped<SyncSupplierCatalogUseCase>();
+        services.AddScoped<ListSupplierSyncLogsUseCase>();
 
         services.AddHostedService<SupplierSyncHostedService>();
 

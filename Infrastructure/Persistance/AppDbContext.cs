@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
 
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Supplier> Suppliers => Set<Supplier>();
+    public DbSet<SupplierSyncLog> SupplierSyncLogs => Set<SupplierSyncLog>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<PaymentDetails> PaymentDetails => Set<PaymentDetails>();

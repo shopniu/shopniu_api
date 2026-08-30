@@ -10,6 +10,14 @@ public sealed record SupplierRequest(
     bool IsActive = true
 );
 
+public sealed record SupplierSyncSummaryDTO(
+    DateTime RunAt,
+    bool Succeeded,
+    int Created,
+    int Updated,
+    int ErrorCount
+);
+
 public sealed record SupplierResponseDTO(
     int Id,
     string Name,
@@ -17,10 +25,11 @@ public sealed record SupplierResponseDTO(
     decimal DefaultShipping,
     int DefaultLeadTimeDays,
     bool IsActive,
-    int ProductCount
+    int ProductCount,
+    SupplierSyncSummaryDTO? LastSync = null
 )
 {
-    public static SupplierResponseDTO FromEntity(Supplier supplier)
+    public static SupplierResponseDTO FromEntity(Supplier supplier, SupplierSyncSummaryDTO? lastSync = null)
     {
         return new SupplierResponseDTO(
             supplier.Id,
@@ -29,12 +38,26 @@ public sealed record SupplierResponseDTO(
             supplier.DefaultShipping,
             supplier.DefaultLeadTimeDays,
             supplier.IsActive,
-            supplier.Products?.Count ?? 0
+            supplier.Products?.Count ?? 0,
+            lastSync
         );
     }
 
     public static IEnumerable<SupplierResponseDTO> FromEntities(IEnumerable<Supplier> suppliers)
     {
-        return suppliers.Select(FromEntity);
+        return suppliers.Select(supplier => FromEntity(supplier));
+    }
+
+    public static async Task<IEnumerable<SupplierResponseDTO>> FromEntitiesAsync(
+        IEnumerable<Supplier> suppliers,
+        Func<Supplier, Task<SupplierSyncSummaryDTO?>> lastSyncResolver)
+    {
+        var result = new List<SupplierResponseDTO>();
+        foreach (var supplier in suppliers)
+        {
+            var lastSync = await lastSyncResolver(supplier);
+            result.Add(FromEntity(supplier, lastSync));
+        }
+        return result;
     }
 }
