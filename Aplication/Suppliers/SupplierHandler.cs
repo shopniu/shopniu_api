@@ -1,0 +1,42 @@
+using Shopniu_api.Aplication.Suppliers.UseCases.CreateSupplier;
+using Shopniu_api.Aplication.Suppliers.UseCases.ListSuppliers;
+using Shopniu_api.Aplication.Suppliers.UseCases.UpdateSupplier;
+using Shopniu_api.Aplication.Suppliers.Common.DTOs;
+using Shopniu_shared.Common;
+
+namespace Shopniu_api.Aplication.Suppliers;
+
+public class SupplierHandler
+{
+    private readonly ListSuppliersUseCase _listSuppliersUseCase;
+    private readonly CreateSupplierUseCase _createSupplierUseCase;
+    private readonly UpdateSupplierUseCase _updateSupplierUseCase;
+
+    public SupplierHandler(
+        ListSuppliersUseCase listSuppliersUseCase,
+        CreateSupplierUseCase createSupplierUseCase,
+        UpdateSupplierUseCase updateSupplierUseCase)
+    {
+        _listSuppliersUseCase = listSuppliersUseCase;
+        _createSupplierUseCase = createSupplierUseCase;
+        _updateSupplierUseCase = updateSupplierUseCase;
+    }
+
+    public async Task<ApiResponse<IEnumerable<SupplierResponseDTO>>> ListSuppliersAsync()
+    {
+        var result = await _listSuppliersUseCase.ExecuteAsync();
+        return ApiResponse<IEnumerable<SupplierResponseDTO>>.Ok(result, "Suppliers Retrieved Successfully");
+    }
+
+    public async Task<ApiResponse<SupplierResponseDTO>> CreateSupplierAsync(SupplierRequest dto)
+    {
+        var result = await _createSupplierUseCase.ExecuteAsync(dto);
+        return ApiResponse<SupplierResponseDTO>.Ok(result, "Supplier Created Successfully");
+    }
+
+    public async Task<ApiResponse<SupplierResponseDTO>> UpdateSupplierAsync(int id, SupplierRequest dto)
+    {
+        var result = await _updateSupplierUseCase.ExecuteAsync(id, dto);
+        return ApiResponse<SupplierResponseDTO>.Ok(result, "Supplier Updated Successfully");
+    }
+}

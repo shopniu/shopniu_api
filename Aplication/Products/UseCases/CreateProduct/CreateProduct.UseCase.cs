@@ -51,6 +51,6 @@ public class CreateProductUseCase
         });
 
         await _unitOfWork.SaveChangesAsync();
-        return ProductResponseDTO.FromEntity(product);
+        return ProductResponseDTO.FromEntity(product, includeInternal: true);
     }
 }

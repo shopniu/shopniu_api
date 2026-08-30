@@ -12,6 +12,7 @@ public static class RepositoryServicesExtensions
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IProductRepository, ProductsRepository>();
+        services.AddScoped<ISupplierRepository, SupplierRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IDeliveryRepository, DeliveryRepository>();

@@ -41,5 +41,9 @@ public class ImportProductItemValidator : AbstractValidator<ImportProductItem>
 
         RuleFor(x => x.LeadTimeDays)
             .GreaterThan(0).WithMessage("Lead time days must be greater than zero.");
+
+        RuleFor(x => x.SupplierId)
+            .GreaterThan(0).When(x => x.SupplierId.HasValue)
+            .WithMessage("Supplier ID must be a positive integer.");
     }
 }

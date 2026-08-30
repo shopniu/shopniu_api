@@ -15,17 +15,20 @@ namespace Shopniu_api.Aplication.Products;
 public class ImportProductsUseCase
 {
     private readonly IProductRepository _productRepository;
+    private readonly ISupplierRepository _supplierRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
     private readonly decimal _markupPercent;
 
     public ImportProductsUseCase(
         IProductRepository productRepository,
+        ISupplierRepository supplierRepository,
         IUnitOfWork unitOfWork,
         ICurrentUserService currentUser,
         IConfiguration configuration)
     {
         _productRepository = productRepository;
+        _supplierRepository = supplierRepository;
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
         _markupPercent = configuration.GetValue<decimal>("DropShipping:MarkupPercent", 30);
@@ -47,6 +50,16 @@ public class ImportProductsUseCase
         {
             try
             {
+                // Si el ítem referencia un proveedor registrado, se valida su
+                // existencia y se toma el nombre del proveedor como snapshot.
+                string? supplierName = item.SupplierName;
+                if (item.SupplierId.HasValue)
+                {
+                    var supplier = await _supplierRepository.GetByIdAsync(item.SupplierId.Value)
+                        ?? throw new NotFoundException("Supplier", item.SupplierId.Value);
+                    supplierName = supplier.Name;
+                }
+
                 var price = Math.Round(item.CostPrice * (1 + _markupPercent / 100m), 2);
                 var product = await _productRepository.CreateAsync(new Product(
                     name: item.Name,
@@ -57,8 +70,9 @@ public class ImportProductsUseCase
                     userId: userId,
                     sourcing: ProductSourcing.External,
                     costPrice: item.CostPrice,
-                    supplierName: item.SupplierName,
-                    leadTimeDays: item.LeadTimeDays
+                    supplierName: supplierName,
+                    leadTimeDays: item.LeadTimeDays,
+                    supplierId: item.SupplierId
                 ));
 
                 // El importador queda registrado como dueño del producto.
@@ -68,9 +82,9 @@ public class ImportProductsUseCase
                     UserId = userId
                 });
 
-                products.Add(ProductResponseDTO.FromEntity(product));
+                products.Add(ProductResponseDTO.FromEntity(product, includeInternal: true));
             }
-            catch (Exception ex) when (ex is ValidationsException or ValidationException)
+            catch (Exception ex) when (ex is ValidationsException or ValidationException or NotFoundException)
             {
                 errors.Add($"{item.Name}: {ex.Message}");
             }

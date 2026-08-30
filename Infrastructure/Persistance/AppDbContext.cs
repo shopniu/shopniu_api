@@ -5,6 +5,7 @@ using Shopniu_api.Domain.Entities.OrderEntity;
 using Shopniu_api.Domain.Entities.TransactionEntity;
 using Shopniu_api.Domain.Entities.PaymentDetailsEntity;
 using Shopniu_api.Domain.Entities.ProductEntity;
+using Shopniu_api.Domain.Entities.SupplierEntity;
 using Shopniu_api.Domain.Entities.UserPaymentDataEntity;
 
 namespace Shopniu_api.Infrastructure.Persistance;
@@ -17,6 +18,7 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<PaymentDetails> PaymentDetails => Set<PaymentDetails>();

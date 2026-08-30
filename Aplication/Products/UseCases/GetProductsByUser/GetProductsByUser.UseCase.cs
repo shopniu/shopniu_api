@@ -29,6 +29,6 @@ public class GetProductsByUserUseCase
         }
 
         var products = await _productRepository.GetByOwnerIdAsync(userId);
-        return ProductResponseDTO.FromEntities(products);
+        return ProductResponseDTO.FromEntities(products, includeInternal: true);
     }
 }

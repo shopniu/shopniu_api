@@ -4,6 +4,7 @@ using Shopniu_api.Domain.Entities.common;
 using Shopniu_api.Domain.Entities.MediaEntity;
 using Shopniu_api.Domain.Entities.OrderEntity;
 using Shopniu_api.Domain.Entities.ProductEntity.Exceptions;
+using Shopniu_api.Domain.Entities.SupplierEntity;
 
 namespace Shopniu_api.Domain.Entities.ProductEntity
 {
@@ -37,6 +38,12 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
         /// <summary>Días estimados de despacho del proveedor.</summary>
         public int? LeadTimeDays { get; set; }
 
+        /// <summary>Proveedor asociado (opcional). Null si el producto se
+        /// despacha con stock local.</summary>
+        public int? SupplierId { get; set; }
+
+        public Supplier? Supplier { get; set; }
+
         /// <summary>Usuario (identity) que creó el producto. Null solo en
         /// filas legacy anteriores a registrar el creador.</summary>
         public int? UserId { get; set; }
@@ -56,7 +63,8 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
             bool certifiedOriginal = false,
             decimal? costPrice = null,
             string? supplierName = null,
-            int? leadTimeDays = null)
+            int? leadTimeDays = null,
+            int? supplierId = null)
         {
             ValidateDetails(name, price, imageUrl, stock);
             Name = name;
@@ -70,6 +78,7 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
             CostPrice = costPrice;
             SupplierName = supplierName;
             LeadTimeDays = leadTimeDays;
+            SupplierId = supplierId;
         }
 
         /// <summary>Actualiza los datos editables del producto con las mismas

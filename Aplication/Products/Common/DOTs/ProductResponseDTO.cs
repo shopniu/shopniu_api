@@ -16,10 +16,15 @@ public record ProductResponseDTO(
     ProductSourcing Sourcing = ProductSourcing.LocalStock,
     bool CertifiedOriginal = false,
     string? SupplierName = null,
-    int? LeadTimeDays = null
+    int? LeadTimeDays = null,
+    int? SupplierId = null,
+    decimal? CostPrice = null
 )
 {
-    public static ProductResponseDTO FromEntity(Product product, bool includeMedia = false)
+    /// <param name="includeMedia">Incluye la galería de imágenes.</param>
+    /// <param name="includeInternal">Incluye el costo (solo flujos de
+    /// back-office; el catálogo público jamás debe exponer el costo).</param>
+    public static ProductResponseDTO FromEntity(Product product, bool includeMedia = false, bool includeInternal = false)
     {
         return new ProductResponseDTO(
             product.Id,
@@ -38,12 +43,14 @@ public record ProductResponseDTO(
             product.Sourcing,
             product.CertifiedOriginal,
             product.SupplierName,
-            product.LeadTimeDays
+            product.LeadTimeDays,
+            product.SupplierId,
+            includeInternal ? product.CostPrice : null
         );
     }
 
-    public static IEnumerable<ProductResponseDTO> FromEntities(IEnumerable<Product> products, bool includeMedia = false)
+    public static IEnumerable<ProductResponseDTO> FromEntities(IEnumerable<Product> products, bool includeMedia = false, bool includeInternal = false)
     {
-        return products.Select(product => FromEntity(product, includeMedia));
+        return products.Select(product => FromEntity(product, includeMedia, includeInternal));
     }
 }
