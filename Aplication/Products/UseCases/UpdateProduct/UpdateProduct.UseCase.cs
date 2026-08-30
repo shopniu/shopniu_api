@@ -9,12 +9,18 @@ namespace Shopniu_api.Aplication.Products;
 public class UpdateProductUseCase
 {
     private readonly IProductRepository _productRepository;
+    private readonly ISupplierRepository _supplierRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUser;
 
-    public UpdateProductUseCase(IProductRepository productRepository, IUnitOfWork unitOfWork, ICurrentUserService currentUser)
+    public UpdateProductUseCase(
+        IProductRepository productRepository,
+        ISupplierRepository supplierRepository,
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUser)
     {
         _productRepository = productRepository;
+        _supplierRepository = supplierRepository;
         _unitOfWork = unitOfWork;
         _currentUser = currentUser;
     }
@@ -40,12 +46,28 @@ public class UpdateProductUseCase
                 $"User {userId} is not allowed to edit product {id}.");
         }
 
+        // Si se asocia un proveedor registrado, el nombre se toma de él como
+        // snapshot en vez del texto libre.
+        string? supplierName = dto.SupplierName;
+        if (dto.SupplierId.HasValue)
+        {
+            var supplier = await _supplierRepository.GetByIdAsync(dto.SupplierId.Value)
+                ?? throw new NotFoundException("Supplier", dto.SupplierId.Value);
+            supplierName = supplier.Name;
+        }
+
         product.Update(
             name: dto.Name,
             price: dto.Price,
             imageUrl: dto.ImageUrl,
             description: dto.Description,
-            stock: dto.Stock
+            stock: dto.Stock,
+            sourcing: dto.Sourcing,
+            certifiedOriginal: dto.CertifiedOriginal,
+            costPrice: dto.CostPrice,
+            supplierName: supplierName,
+            leadTimeDays: dto.LeadTimeDays,
+            supplierId: dto.SupplierId
         );
 
         await _productRepository.UpdateAsync(product);

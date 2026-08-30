@@ -82,8 +82,21 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
         }
 
         /// <summary>Actualiza los datos editables del producto con las mismas
-        /// validaciones de creación.</summary>
-        public void Update(string name, decimal price, string imageUrl, string description, int stock)
+        /// validaciones de creación. Los campos nullable (costo, proveedor,
+        /// lead time) se asignan tal cual: null los limpia. Sourcing y
+        /// CertifiedOriginal solo se tocan cuando vienen con valor.</summary>
+        public void Update(
+            string name,
+            decimal price,
+            string imageUrl,
+            string description,
+            int stock,
+            ProductSourcing? sourcing = null,
+            bool? certifiedOriginal = null,
+            decimal? costPrice = null,
+            string? supplierName = null,
+            int? leadTimeDays = null,
+            int? supplierId = null)
         {
             ValidateDetails(name, price, imageUrl, stock);
             Name = name;
@@ -91,6 +104,14 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
             ImageUrl = imageUrl;
             Description = description;
             Stock = stock;
+            if (sourcing.HasValue)
+                Sourcing = sourcing.Value;
+            if (certifiedOriginal.HasValue)
+                CertifiedOriginal = certifiedOriginal.Value;
+            CostPrice = costPrice;
+            SupplierName = supplierName;
+            LeadTimeDays = leadTimeDays;
+            SupplierId = supplierId;
         }
 
         private static void ValidateDetails(string name, decimal price, string imageUrl, int stock)
