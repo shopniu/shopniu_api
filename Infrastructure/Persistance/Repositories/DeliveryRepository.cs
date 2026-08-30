@@ -37,6 +37,17 @@ public class DeliveryRepository : IDeliveryRepository
             .ToListAsync();
     }
 
+    public async Task<List<Delivery>> GetByUserIdWithDetailsAsync(int userId)
+    {
+        return await _context.Deliveries
+            .Include(d => d.Transaction)
+                .ThenInclude(t => t.Orders)
+                .ThenInclude(o => o.Product)
+            .Where(d => d.UserId == userId)
+            .OrderByDescending(d => d.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task<Delivery?> GetByTransactionIdWithDetailsAsync(int transactionId)
     {
         return await _context.Deliveries

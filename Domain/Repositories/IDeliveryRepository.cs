@@ -7,6 +7,7 @@ public interface IDeliveryRepository
     Task<Delivery> CreateAsync(Delivery delivery);
     Task<Delivery?> GetByTransactionIdAsync(int transactionId);
     Task<List<Delivery>> GetAllWithDetailsAsync();
+    Task<List<Delivery>> GetByUserIdWithDetailsAsync(int userId);
     Task<Delivery?> GetByTransactionIdWithDetailsAsync(int transactionId);
     Task UpdateAsync(Delivery delivery);
 }

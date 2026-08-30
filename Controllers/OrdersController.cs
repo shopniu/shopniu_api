@@ -26,6 +26,15 @@ public class OrdersController : ControllerBase
         return Ok(await _orderHandler.ListOrdersAsync(status));
     }
 
+    // Pedidos del comprador autenticado (solo los suyos). Cualquier sesión
+    // sirve: la resolución del usuario viene del token, no de la request.
+    [Authorize]
+    [HttpGet("mine")]
+    public async Task<IActionResult> GetMyOrders()
+    {
+        return Ok(await _orderHandler.ListMyOrdersAsync());
+    }
+
     // Transición de estado del despacho (enviado/entregado) + tracking.
     [Authorize(Policy = "order.update")]
     [HttpPatch("{transactionId:int}/status")]
