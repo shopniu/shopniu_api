@@ -19,6 +19,24 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
         public int Stock { get; set; } = 0;
         public string Description { get; set; }
 
+        /// <summary>Origen del inventario: stock local o despacho por
+        /// proveedor externo (dropshipping).</summary>
+        public ProductSourcing Sourcing { get; set; } = ProductSourcing.LocalStock;
+
+        /// <summary>Indica que el producto es original certificado de la
+        /// marca (autenticidad verificada).</summary>
+        public bool CertifiedOriginal { get; set; } = false;
+
+        /// <summary>Costo de compra al proveedor (dropshipping). Solo interno:
+        /// nunca se expone al cliente ni al front.</summary>
+        public decimal? CostPrice { get; set; }
+
+        /// <summary>Nombre del proveedor que despacha el producto.</summary>
+        public string? SupplierName { get; set; }
+
+        /// <summary>Días estimados de despacho del proveedor.</summary>
+        public int? LeadTimeDays { get; set; }
+
         /// <summary>Usuario (identity) que creó el producto. Null solo en
         /// filas legacy anteriores a registrar el creador.</summary>
         public int? UserId { get; set; }
@@ -27,7 +45,18 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
         public List<MediaAsset> Media { get; set; } = new List<MediaAsset>();
 
 
-        public Product(string name, decimal price, string imageUrl, string description, int stock, int? userId = null)
+        public Product(
+            string name,
+            decimal price,
+            string imageUrl,
+            string description,
+            int stock,
+            int? userId = null,
+            ProductSourcing sourcing = ProductSourcing.LocalStock,
+            bool certifiedOriginal = false,
+            decimal? costPrice = null,
+            string? supplierName = null,
+            int? leadTimeDays = null)
         {
             ValidateDetails(name, price, imageUrl, stock);
             Name = name;
@@ -36,6 +65,11 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
             Description = description;
             Stock = stock;
             UserId = userId;
+            Sourcing = sourcing;
+            CertifiedOriginal = certifiedOriginal;
+            CostPrice = costPrice;
+            SupplierName = supplierName;
+            LeadTimeDays = leadTimeDays;
         }
 
         /// <summary>Actualiza los datos editables del producto con las mismas
@@ -64,7 +98,6 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
                 throw new ValidationsException("Stock quantity cannot be negative.");
         }
 
-        // Method to validate stock availability
         public void ValidateStock(int requestedQuantity)
         {
             if (requestedQuantity > Stock)

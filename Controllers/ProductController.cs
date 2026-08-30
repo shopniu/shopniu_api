@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Shopniu_api.Aplication.Products;
 using Shopniu_api.Aplication.Products.UseCases.CreateProduct;
+using Shopniu_api.Aplication.Products.UseCases.ImportProducts;
 using Shopniu_api.Aplication.Products.UseCases.UpdateProduct;
 
 namespace Shopniu_api.Routes;
@@ -39,6 +40,26 @@ public class ProductController : ControllerBase
     {
         var response = await _productHandler.CreateProductAsync(dto);
         return Ok(response);
+    }
+
+    // Importación batch de catálogo de proveedor (dropshipping): cada ítem se
+    // valida y crea de forma independiente. El precio se deriva del costo con
+    // el markup configurado, nunca se recibe del cliente.
+    [Authorize(Policy = "product.create")]
+    [HttpPost("import")]
+    public async Task<IActionResult> ImportProducts([FromBody] ImportProductsRequest dto)
+    {
+        var response = await _productHandler.ImportProductsAsync(dto);
+        return Ok(response);
+    }
+
+    // Metadatos del flujo de importación (markup configurado) para que el
+    // back-office previsualice el precio de venta antes de importar.
+    [Authorize(Policy = "product.create")]
+    [HttpGet("import/meta")]
+    public IActionResult GetImportMeta()
+    {
+        return Ok(_productHandler.GetImportMeta());
     }
 
     // Solo el dueño del producto (ProductOwners) puede editarlo; el use case

@@ -26,6 +26,19 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasMaxLength(1000);
         builder.Property(p => p.Stock)
             .IsRequired();
+        builder.Property(p => p.Sourcing)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(32)
+            .HasDefaultValue(ProductSourcing.LocalStock);
+        builder.Property(p => p.CertifiedOriginal)
+            .IsRequired()
+            .HasDefaultValue(false);
+        builder.Property(p => p.CostPrice)
+            .HasColumnType("decimal(18,2)");
+        builder.Property(p => p.SupplierName)
+            .HasMaxLength(200);
+        builder.Property(p => p.LeadTimeDays);
 
     }
 }

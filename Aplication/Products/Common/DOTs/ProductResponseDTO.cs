@@ -12,7 +12,11 @@ public record ProductResponseDTO(
     string ImageUrl,
     string Description,
     int Stock,
-    List<MediaAssetResponse>? Media = null
+    List<MediaAssetResponse>? Media = null,
+    ProductSourcing Sourcing = ProductSourcing.LocalStock,
+    bool CertifiedOriginal = false,
+    string? SupplierName = null,
+    int? LeadTimeDays = null
 )
 {
     public static ProductResponseDTO FromEntity(Product product, bool includeMedia = false)
@@ -30,7 +34,11 @@ public record ProductResponseDTO(
                     .ThenByDescending(m => m.CreatedAt)
                     .Select(MediaAssetResponse.FromEntity)
                     .ToList()
-                : null
+                : null,
+            product.Sourcing,
+            product.CertifiedOriginal,
+            product.SupplierName,
+            product.LeadTimeDays
         );
     }
 
