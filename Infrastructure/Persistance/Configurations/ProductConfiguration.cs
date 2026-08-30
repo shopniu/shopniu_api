@@ -40,6 +40,11 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasMaxLength(200);
         builder.Property(p => p.LeadTimeDays);
 
+        builder.Property(p => p.SupplierSku)
+            .HasMaxLength(100);
+
+        builder.HasIndex(p => new { p.SupplierId, p.SupplierSku });
+
         builder.HasOne(p => p.Supplier)
             .WithMany(s => s.Products)
             .HasForeignKey(p => p.SupplierId)

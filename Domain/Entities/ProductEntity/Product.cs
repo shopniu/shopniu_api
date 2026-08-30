@@ -44,6 +44,11 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
 
         public Supplier? Supplier { get; set; }
 
+        /// <summary>SKU/identificador del producto en el catálogo del
+        /// proveedor. Usado por el sync para matchear items (no se expone
+        /// al cliente).</summary>
+        public string? SupplierSku { get; set; }
+
         /// <summary>Usuario (identity) que creó el producto. Null solo en
         /// filas legacy anteriores a registrar el creador.</summary>
         public int? UserId { get; set; }
@@ -64,7 +69,8 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
             decimal? costPrice = null,
             string? supplierName = null,
             int? leadTimeDays = null,
-            int? supplierId = null)
+            int? supplierId = null,
+            string? supplierSku = null)
         {
             ValidateDetails(name, price, imageUrl, stock);
             Name = name;
@@ -79,6 +85,7 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
             SupplierName = supplierName;
             LeadTimeDays = leadTimeDays;
             SupplierId = supplierId;
+            SupplierSku = supplierSku;
         }
 
         /// <summary>Actualiza los datos editables del producto con las mismas

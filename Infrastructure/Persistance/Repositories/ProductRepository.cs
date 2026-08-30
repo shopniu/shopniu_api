@@ -25,6 +25,12 @@ public class ProductsRepository : IProductRepository
     {
         return await _context.Products.Where(p => ids.Contains(p.Id)).ToListAsync();
     }
+
+    public async Task<Product?> GetBySupplierAndSkuAsync(int supplierId, string supplierSku)
+    {
+        return await _context.Products.FirstOrDefaultAsync(p =>
+            p.SupplierId == supplierId && p.SupplierSku == supplierSku);
+    }
     public async Task<List<Product>> GetAllAsync(bool includeMedia = false)
     {
         var query = _context.Products.AsQueryable();

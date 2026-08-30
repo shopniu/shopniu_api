@@ -1,5 +1,7 @@
+using Shopniu_api.Aplication.Common.Ports.Identity;
 using Shopniu_api.Aplication.Suppliers.UseCases.CreateSupplier;
 using Shopniu_api.Aplication.Suppliers.UseCases.ListSuppliers;
+using Shopniu_api.Aplication.Suppliers.UseCases.SyncSupplierCatalog;
 using Shopniu_api.Aplication.Suppliers.UseCases.UpdateSupplier;
 using Shopniu_api.Aplication.Suppliers.Common.DTOs;
 using Shopniu_shared.Common;
@@ -11,15 +13,21 @@ public class SupplierHandler
     private readonly ListSuppliersUseCase _listSuppliersUseCase;
     private readonly CreateSupplierUseCase _createSupplierUseCase;
     private readonly UpdateSupplierUseCase _updateSupplierUseCase;
+    private readonly SyncSupplierCatalogUseCase _syncSupplierCatalogUseCase;
+    private readonly ICurrentUserService _currentUser;
 
     public SupplierHandler(
         ListSuppliersUseCase listSuppliersUseCase,
         CreateSupplierUseCase createSupplierUseCase,
-        UpdateSupplierUseCase updateSupplierUseCase)
+        UpdateSupplierUseCase updateSupplierUseCase,
+        SyncSupplierCatalogUseCase syncSupplierCatalogUseCase,
+        ICurrentUserService currentUser)
     {
         _listSuppliersUseCase = listSuppliersUseCase;
         _createSupplierUseCase = createSupplierUseCase;
         _updateSupplierUseCase = updateSupplierUseCase;
+        _syncSupplierCatalogUseCase = syncSupplierCatalogUseCase;
+        _currentUser = currentUser;
     }
 
     public async Task<ApiResponse<IEnumerable<SupplierResponseDTO>>> ListSuppliersAsync()
@@ -38,5 +46,11 @@ public class SupplierHandler
     {
         var result = await _updateSupplierUseCase.ExecuteAsync(id, dto);
         return ApiResponse<SupplierResponseDTO>.Ok(result, "Supplier Updated Successfully");
+    }
+
+    public async Task<ApiResponse<SyncSupplierCatalogResult>> SyncSupplierAsync(int id)
+    {
+        var result = await _syncSupplierCatalogUseCase.ExecuteAsync(id, _currentUser.UserId);
+        return ApiResponse<SyncSupplierCatalogResult>.Ok(result, "Supplier catalog synced successfully");
     }
 }

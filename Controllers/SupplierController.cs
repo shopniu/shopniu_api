@@ -38,4 +38,13 @@ public class SupplierController : ControllerBase
     {
         return Ok(await _supplierHandler.UpdateSupplierAsync(id, dto));
     }
+
+    // Sincroniza el catálogo del proveedor on-demand (crea/actualiza productos
+    // externos con el markup y el stock reportado por el proveedor).
+    [Authorize(Policy = "product.create")]
+    [HttpPost("{id:int}/sync")]
+    public async Task<IActionResult> SyncSupplier(int id)
+    {
+        return Ok(await _supplierHandler.SyncSupplierAsync(id));
+    }
 }

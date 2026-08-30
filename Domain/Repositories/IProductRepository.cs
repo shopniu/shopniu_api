@@ -8,6 +8,7 @@ namespace Shopniu_api.Domain.Repositories
         Task<List<Product>> GetByOwnerIdAsync(int userId);
         Task<Product?> GetByIdAsync(int id);
         Task<List<Product>> GetByIdsAsync(List<int> ids);
+        Task<Product?> GetBySupplierAndSkuAsync(int supplierId, string supplierSku);
         Task<Product> CreateAsync(Product product);
         Task AddOwnerAsync(ProductOwner owner);
         Task<bool> IsOwnedByAsync(int productId, int userId);

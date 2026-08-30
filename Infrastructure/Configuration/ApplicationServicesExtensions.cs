@@ -19,7 +19,9 @@ using Shopniu_api.Aplication.Products.UseCases.UpdateProduct;
 using Shopniu_api.Aplication.Suppliers;
 using Shopniu_api.Aplication.Suppliers.UseCases.CreateSupplier;
 using Shopniu_api.Aplication.Suppliers.UseCases.ListSuppliers;
+using Shopniu_api.Aplication.Suppliers.UseCases.SyncSupplierCatalog;
 using Shopniu_api.Aplication.Suppliers.UseCases.UpdateSupplier;
+using Shopniu_api.Infrastructure.Background;
 using Shopniu_api.Aplication.Transactions;
 using Shopniu_api.Aplication.Transactions.UseCases.CreateTransaction;
 using Shopniu_api.Aplication.Transactions.UseCases.VerifyTransactionStatus;
@@ -41,6 +43,9 @@ public static class ApplicationServicesExtensions
         services.AddScoped<ListSuppliersUseCase>();
         services.AddScoped<CreateSupplierUseCase>();
         services.AddScoped<UpdateSupplierUseCase>();
+        services.AddScoped<SyncSupplierCatalogUseCase>();
+
+        services.AddHostedService<SupplierSyncHostedService>();
 
         services.AddScoped<DashboardHandler>();
         services.AddScoped<GetDashboardSummaryUseCase>();

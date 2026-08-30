@@ -1,5 +1,7 @@
 using Shopniu_api.Aplication.Common.Ports;
+using Shopniu_api.Aplication.Suppliers.Ports;
 using Shopniu_api.Domain.Repositories;
+using Shopniu_api.Infrastructure.ExternalServices.Suppliers;
 using Shopniu_api.Infrastructure.Persistance;
 using Shopniu_api.Infrastructure.Persistance.Repositories;
 using Shopniu_api.Infrastructure.Services.Users;
@@ -13,6 +15,7 @@ public static class RepositoryServicesExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IProductRepository, ProductsRepository>();
         services.AddScoped<ISupplierRepository, SupplierRepository>();
+        services.AddScoped<ISupplierCatalogProvider, CsvSupplierCatalogProvider>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IDeliveryRepository, DeliveryRepository>();
