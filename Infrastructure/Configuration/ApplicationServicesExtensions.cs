@@ -16,6 +16,7 @@ using Shopniu_api.Aplication.Payments;
 using Shopniu_api.Aplication.Payments.UseCases.GetPaymentMethods;
 using Shopniu_api.Aplication.Payments.UseCases.ProcessPaymentWebhook;
 using Shopniu_api.Aplication.Products;
+using Shopniu_api.Aplication.Products.UseCases.ExtractProductFromUrl;
 using Shopniu_api.Aplication.Products.UseCases.GetAllProducts;
 using Shopniu_api.Aplication.Products.UseCases.GetProductsByUser;
 using Shopniu_api.Aplication.Products.UseCases.ImportProducts;
@@ -43,6 +44,7 @@ public static class ApplicationServicesExtensions
         services.AddScoped<GetProductsByUserUseCase>();
         services.AddScoped<UpdateProductUseCase>();
         services.AddScoped<ImportProductsUseCase>();
+        services.AddScoped<ExtractProductFromUrlUseCase>();
 
         services.AddScoped<SupplierHandler>();
         services.AddScoped<ListSuppliersUseCase>();

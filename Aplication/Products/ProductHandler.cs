@@ -1,4 +1,5 @@
 using Shopniu_api.Aplication.Products.UseCases.CreateProduct;
+using Shopniu_api.Aplication.Products.UseCases.ExtractProductFromUrl;
 using Shopniu_api.Aplication.Products.UseCases.GetAllProducts;
 using Shopniu_api.Aplication.Products.UseCases.GetProductsByUser;
 using Shopniu_api.Aplication.Products.UseCases.ImportProducts;
@@ -15,6 +16,7 @@ public class ProductHandler
     private readonly GetProductsByUserUseCase _getProductsByUserUseCase;
     private readonly UpdateProductUseCase _updateProductUseCase;
     private readonly ImportProductsUseCase _importProductsUseCase;
+    private readonly ExtractProductFromUrlUseCase _extractProductFromUrlUseCase;
     private readonly IConfiguration _configuration;
     public ProductHandler(
         CreateProductUseCase createProductUseCase,
@@ -22,6 +24,7 @@ public class ProductHandler
         GetProductsByUserUseCase getProductsByUserUseCase,
         UpdateProductUseCase updateProductUseCase,
         ImportProductsUseCase importProductsUseCase,
+        ExtractProductFromUrlUseCase extractProductFromUrlUseCase,
         IConfiguration configuration)
     {
         _getAllProductsUseCase = getAllProductsUseCase;
@@ -29,6 +32,7 @@ public class ProductHandler
         _getProductsByUserUseCase = getProductsByUserUseCase;
         _updateProductUseCase = updateProductUseCase;
         _importProductsUseCase = importProductsUseCase;
+        _extractProductFromUrlUseCase = extractProductFromUrlUseCase;
         _configuration = configuration;
     }
 
@@ -70,5 +74,11 @@ public class ProductHandler
         return ApiResponse<ImportMetaResponse>.Ok(
             new ImportMetaResponse(markupPercent),
             "Import meta retrieved successfully");
+    }
+
+    public async Task<ApiResponse<ExtractedProductDTO>> ExtractProductFromUrlAsync(ExtractProductFromUrlRequest dto)
+    {
+        var result = await _extractProductFromUrlUseCase.ExecuteAsync(dto);
+        return ApiResponse<ExtractedProductDTO>.Ok(result, "Product extracted successfully");
     }
 }

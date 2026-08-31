@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Shopniu_api.Aplication.Products;
 using Shopniu_api.Aplication.Products.UseCases.CreateProduct;
+using Shopniu_api.Aplication.Products.UseCases.ExtractProductFromUrl;
 using Shopniu_api.Aplication.Products.UseCases.ImportProducts;
 using Shopniu_api.Aplication.Products.UseCases.UpdateProduct;
 
@@ -60,6 +61,15 @@ public class ProductController : ControllerBase
     public IActionResult GetImportMeta()
     {
         return Ok(_productHandler.GetImportMeta());
+    }
+
+    // Extrae la info de un producto desde su URL (JSON-LD/OpenGraph) para
+    // previsualizarla en el flujo de importación. No crea nada.
+    [Authorize(Policy = "product.create")]
+    [HttpPost("import/from-url")]
+    public async Task<IActionResult> ExtractProductFromUrl([FromBody] ExtractProductFromUrlRequest dto)
+    {
+        return Ok(await _productHandler.ExtractProductFromUrlAsync(dto));
     }
 
     // Solo el dueño del producto (ProductOwners) puede editarlo; el use case
