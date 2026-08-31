@@ -214,15 +214,36 @@ public partial class JsonLdProductUrlExtractor : IProductUrlExtractor
             ? offers.EnumerateArray().FirstOrDefault()
             : offers;
 
-        if (offer.ValueKind != JsonValueKind.Object
-            || !offer.TryGetProperty("price", out var price)
-            || price.ValueKind != JsonValueKind.String
-            || !decimal.TryParse(price.GetString(), NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed))
+        if (offer.ValueKind != JsonValueKind.Object)
         {
             return null;
         }
 
-        return parsed;
+        // `price` directo; `lowPrice` cuando es AggregateOffer (rango).
+        foreach (var property in new[] { "price", "lowPrice" })
+        {
+            if (offer.TryGetProperty(property, out var price)
+                && TryParsePrice(price, out var parsed))
+            {
+                return parsed;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool TryParsePrice(JsonElement price, out decimal parsed)
+    {
+        parsed = 0;
+        var raw = price.ValueKind switch
+        {
+            JsonValueKind.String => price.GetString(),
+            JsonValueKind.Number => price.GetRawText(),
+            _ => null,
+        };
+
+        return raw is not null
+            && decimal.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed);
     }
 
     private static string? GetBrand(JsonElement element)
