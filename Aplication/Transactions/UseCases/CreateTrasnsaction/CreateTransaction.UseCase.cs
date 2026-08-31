@@ -23,6 +23,7 @@ public class CreateTransactionUseCase
     private readonly IDeliveryRepository _deliveryRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICardEncryptionService _cardEncryption;
+    private readonly ILogger<CreateTransactionUseCase> _logger;
     public CreateTransactionUseCase(
         ITransactionRepository transactionRepository,
         ICurrentUserService currentUserService,
@@ -32,7 +33,8 @@ public class CreateTransactionUseCase
         IUserPaymentDataRepository userPaymentDataRepository,
         IDeliveryRepository deliveryRepository,
         IUnitOfWork unitOfWork,
-        ICardEncryptionService cardEncryption)
+        ICardEncryptionService cardEncryption,
+        ILogger<CreateTransactionUseCase> logger)
     {
         _transactionRepository = transactionRepository;
         _productRepository = productRepository;
@@ -43,6 +45,7 @@ public class CreateTransactionUseCase
         _deliveryRepository = deliveryRepository;
         _unitOfWork = unitOfWork;
         _cardEncryption = cardEncryption;
+        _logger = logger;
     }
 
     public async Task<CreateTransactionResponse> ExecuteAsync(CreateTransactionRequest dto)
@@ -161,6 +164,14 @@ public class CreateTransactionUseCase
             AcceptanceToken: dto.AcceptanceToken,
             AcceptancePersonalToken: dto.AcceptancePersonalToken
         );
+
+        // TEMP DEBUG: logear qué se manda a Wompi para el error de monto mínimo.
+        _logger.LogInformation(
+            "PAY-DEBUG: currency={Currency} amountInCents={Amount} totalInCents={Total} products=[{Products}]",
+            paymentRequest.Currency,
+            paymentRequest.AmountInCents,
+            paymentDetails.TotalInCents,
+            string.Join(", ", productsWithQuantity.Select(p => $"{p.Product.Id}:{p.quantity}@{p.Product.Price}")));
 
         var paymentResponse = await _paymentGateway.CreatePayment(paymentRequest);
 
