@@ -45,9 +45,9 @@ public class PaymentDetails : BaseEntity
         decimal taxRate = 0.19m)  // ej. IVA Colombia 19%, ajusta según tu caso
     {
         // El precio del producto está en unidades de moneda (p. ej. 299.900 COP).
-        // La unidad menor de la moneda determina el factor: COP no tiene
-        // decimales (1 COP = 1 centavo Wompi); USD/EUR sí (×100).
-        var multiplier = currency == CurrencyType.COP ? 1m : 100m;
+        // Wompi recibe el monto en la unidad menor (centavos): para todas las
+        // monedas, incluyendo COP, es precio × 100.
+        var multiplier = 100m;
         var amountInCents = products.Sum(p => p.quantity * Math.Round(p.Product.Price * multiplier));
         if (amountInCents <= 0)
             throw new BusinessRuleException("El monto debe ser mayor a cero.");
