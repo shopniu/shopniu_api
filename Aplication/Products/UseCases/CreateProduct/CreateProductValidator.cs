@@ -38,5 +38,9 @@ public class CreateProductValidator : AbstractValidator<CreateProductRequest>
 
         RuleFor(x => x.SupplierName)
             .MaximumLength(200).WithMessage("Supplier name must not exceed 200 characters.");
+
+        RuleFor(x => x.MarkupPercent)
+            .GreaterThanOrEqualTo(0).When(x => x.MarkupPercent.HasValue)
+            .WithMessage("Markup percent must be zero or greater.");
     }
 }

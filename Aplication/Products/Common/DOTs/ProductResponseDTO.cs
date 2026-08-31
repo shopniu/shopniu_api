@@ -18,7 +18,8 @@ public record ProductResponseDTO(
     string? SupplierName = null,
     int? LeadTimeDays = null,
     int? SupplierId = null,
-    decimal? CostPrice = null
+    decimal? CostPrice = null,
+    decimal? MarkupPercent = null
 )
 {
     /// <param name="includeMedia">Incluye la galería de imágenes.</param>
@@ -45,7 +46,8 @@ public record ProductResponseDTO(
             product.SupplierName,
             product.LeadTimeDays,
             product.SupplierId,
-            includeInternal ? product.CostPrice : null
+            includeInternal ? product.CostPrice : null,
+            product.MarkupPercent
         );
     }
 

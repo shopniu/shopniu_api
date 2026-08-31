@@ -61,7 +61,8 @@ public class CreateProductUseCase
             costPrice: dto.CostPrice,
             supplierName: supplierName,
             leadTimeDays: dto.LeadTimeDays,
-            supplierId: dto.SupplierId
+            supplierId: dto.SupplierId,
+            markupPercent: dto.MarkupPercent
         ));
 
         // Flujo de propiedad: el creador queda registrado como dueño del

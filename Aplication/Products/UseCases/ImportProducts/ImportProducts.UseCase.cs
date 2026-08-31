@@ -60,7 +60,8 @@ public class ImportProductsUseCase
                     supplierName = supplier.Name;
                 }
 
-                var price = Math.Round(item.CostPrice * (1 + _markupPercent / 100m), 2);
+                var effectiveMarkup = item.MarkupPercent ?? _markupPercent;
+                var price = Math.Round(item.CostPrice * (1 + effectiveMarkup / 100m), 2);
                 var product = await _productRepository.CreateAsync(new Product(
                     name: item.Name,
                     price: price,
@@ -72,7 +73,8 @@ public class ImportProductsUseCase
                     costPrice: item.CostPrice,
                     supplierName: supplierName,
                     leadTimeDays: item.LeadTimeDays,
-                    supplierId: item.SupplierId
+                    supplierId: item.SupplierId,
+                    markupPercent: effectiveMarkup
                 ));
 
                 // El importador queda registrado como dueño del producto.

@@ -45,5 +45,9 @@ public class ImportProductItemValidator : AbstractValidator<ImportProductItem>
         RuleFor(x => x.SupplierId)
             .GreaterThan(0).When(x => x.SupplierId.HasValue)
             .WithMessage("Supplier ID must be a positive integer.");
+
+        RuleFor(x => x.MarkupPercent)
+            .GreaterThanOrEqualTo(0).When(x => x.MarkupPercent.HasValue)
+            .WithMessage("Markup percent must be zero or greater.");
     }
 }

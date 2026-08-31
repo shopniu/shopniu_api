@@ -85,7 +85,8 @@ public class SyncSupplierCatalogUseCase
                             supplierName: supplier.Name,
                             leadTimeDays: item.LeadTimeDays,
                             supplierId: supplier.Id,
-                            supplierSku: item.Sku
+                            supplierSku: item.Sku,
+                            markupPercent: _markupPercent
                         ));
                         await _productRepository.AddOwnerAsync(new ProductOwner
                         {
@@ -103,7 +104,8 @@ public class SyncSupplierCatalogUseCase
                             description: item.Description,
                             stock: item.Stock,
                             costPrice: item.CostPrice,
-                            leadTimeDays: item.LeadTimeDays
+                            leadTimeDays: item.LeadTimeDays,
+                            markupPercent: _markupPercent
                         );
                         existing.Sourcing = ProductSourcing.External;
                         existing.SupplierId = supplier.Id;

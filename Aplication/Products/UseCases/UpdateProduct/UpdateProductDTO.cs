@@ -16,5 +16,6 @@ public sealed record UpdateProductRequest(
     decimal? CostPrice = null,
     string? SupplierName = null,
     int? LeadTimeDays = null,
-    int? SupplierId = null
+    int? SupplierId = null,
+    decimal? MarkupPercent = null
 );

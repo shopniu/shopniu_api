@@ -49,6 +49,11 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
         /// al cliente).</summary>
         public string? SupplierSku { get; set; }
 
+        /// <summary>Markup (porcentaje) con el que se derivó el precio desde
+        /// el costo. Null = usa el global configurado. Solo informativo:
+        /// el precio de venta se guarda explícitamente.</summary>
+        public decimal? MarkupPercent { get; set; }
+
         /// <summary>Usuario (identity) que creó el producto. Null solo en
         /// filas legacy anteriores a registrar el creador.</summary>
         public int? UserId { get; set; }
@@ -70,7 +75,8 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
             string? supplierName = null,
             int? leadTimeDays = null,
             int? supplierId = null,
-            string? supplierSku = null)
+            string? supplierSku = null,
+            decimal? markupPercent = null)
         {
             ValidateDetails(name, price, imageUrl, stock);
             Name = name;
@@ -86,6 +92,7 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
             LeadTimeDays = leadTimeDays;
             SupplierId = supplierId;
             SupplierSku = supplierSku;
+            MarkupPercent = markupPercent;
         }
 
         /// <summary>Actualiza los datos editables del producto con las mismas
@@ -103,7 +110,8 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
             decimal? costPrice = null,
             string? supplierName = null,
             int? leadTimeDays = null,
-            int? supplierId = null)
+            int? supplierId = null,
+            decimal? markupPercent = null)
         {
             ValidateDetails(name, price, imageUrl, stock);
             Name = name;
@@ -119,6 +127,7 @@ namespace Shopniu_api.Domain.Entities.ProductEntity
             SupplierName = supplierName;
             LeadTimeDays = leadTimeDays;
             SupplierId = supplierId;
+            MarkupPercent = markupPercent;
         }
 
         private static void ValidateDetails(string name, decimal price, string imageUrl, int stock)

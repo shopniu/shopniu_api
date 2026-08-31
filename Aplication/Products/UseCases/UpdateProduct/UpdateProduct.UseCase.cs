@@ -67,7 +67,8 @@ public class UpdateProductUseCase
             costPrice: dto.CostPrice,
             supplierName: supplierName,
             leadTimeDays: dto.LeadTimeDays,
-            supplierId: dto.SupplierId
+            supplierId: dto.SupplierId,
+            markupPercent: dto.MarkupPercent
         );
 
         await _productRepository.UpdateAsync(product);

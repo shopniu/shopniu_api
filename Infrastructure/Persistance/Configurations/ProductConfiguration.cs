@@ -43,6 +43,9 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.SupplierSku)
             .HasMaxLength(100);
 
+        builder.Property(p => p.MarkupPercent)
+            .HasColumnType("decimal(5,2)");
+
         builder.HasIndex(p => new { p.SupplierId, p.SupplierSku });
 
         builder.HasOne(p => p.Supplier)
